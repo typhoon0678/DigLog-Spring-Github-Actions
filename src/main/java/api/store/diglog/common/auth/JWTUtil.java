@@ -55,11 +55,7 @@ public class JWTUtil implements InitializingBean {
         return generateToken(member, "accessToken");
     }
 
-    private String generateToken(Member member, String type) {
-        String authorities = member.getRoles().stream()
-                .map(Role::getRole)
-                .collect(Collectors.joining(","));
-
+    private String generateToken(String email, String authorities, String type) {
         long now = (new Date()).getTime();
         Date validity;
         if (type.equals("accessToken")) {
@@ -71,11 +67,27 @@ public class JWTUtil implements InitializingBean {
         }
 
         return Jwts.builder()
-                .subject(member.getEmail())
+                .subject(email)
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(secretKey)
                 .expiration(validity)
                 .compact();
+    }
+
+    private String generateToken(Member member, String type) {
+        String email = member.getEmail();
+        String authorities = member.getRoles().stream()
+                .map(Role::getRole)
+                .collect(Collectors.joining(","));
+
+        return generateToken(email, authorities, type);
+    }
+
+    public Cookie generateRefreshCookie(String email, String authorities) {
+        String type = "refreshToken";
+        String refreshToken = generateToken(email, authorities, type);
+
+        return generateCookie(type, refreshToken, refreshSeconds);
     }
 
     public Cookie generateRefreshCookie(Member member) {

@@ -1,5 +1,6 @@
 package api.store.diglog.common.config;
 
+import api.store.diglog.common.auth.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -13,8 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
-import api.store.diglog.common.auth.JWTFilter;
-import api.store.diglog.common.auth.JWTUtil;
 import lombok.RequiredArgsConstructor;
 
 @EnableWebSecurity
@@ -25,6 +24,9 @@ public class SecurityConfig {
 
     private final CorsFilter corsFilter;
     private final JWTUtil jwtUtil;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+    private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,7 +50,15 @@ public class SecurityConfig {
                         sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .oauth2Login(oauth2 -> oauth2
+                        .redirectionEndpoint(redirect -> redirect
+                                .baseUri("/api/login/oauth2/code/*"))
+                        .userInfoEndpoint(userinfo -> userinfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(customOAuth2SuccessHandler)
+                        .failureHandler(customOAuth2FailureHandler));
 
         return http.build();
     }

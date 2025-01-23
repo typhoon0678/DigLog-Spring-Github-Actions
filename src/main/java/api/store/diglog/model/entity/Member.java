@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -52,6 +53,10 @@ public class Member {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Platform platform;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isDeleted = false;

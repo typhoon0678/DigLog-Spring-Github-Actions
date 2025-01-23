@@ -1,5 +1,6 @@
 package api.store.diglog.service;
 
+import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.emailVerification.EmailVerificationRequestDTO;
 import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequestDTO;
@@ -117,6 +118,7 @@ public class EmailVerificationService {
                 .username(email.split("@")[0])
                 .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
                 .roles(new HashSet<>(Set.of(Role.ROLE_USER)))
+                .platform(Platform.SERVER)
                 .build();
 
         memberRepository.save(member);
