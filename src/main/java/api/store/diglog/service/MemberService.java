@@ -2,6 +2,7 @@ package api.store.diglog.service;
 
 import api.store.diglog.common.util.SecurityUtil;
 import api.store.diglog.model.dto.login.LoginRequestDTO;
+import api.store.diglog.model.dto.member.MemberProfileResponseDTO;
 import api.store.diglog.model.dto.member.MemberUsernameRequestDTO;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
@@ -30,5 +31,16 @@ public class MemberService {
     public void updateUsername(MemberUsernameRequestDTO memberUsernameRequestDTO) {
         String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
         memberRepository.updateUsername(memberUsernameRequestDTO.getUsername(), email);
+    }
+
+    public MemberProfileResponseDTO getProfile() {
+        String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(); // todo: 에러 구현 (LOGIN_FAILED, 이메일 또는 비밀번호가 일치하지 않습니다.)
+
+        return MemberProfileResponseDTO.builder()
+                .email(email)
+                .username(member.getUsername())
+                .build();
     }
 }

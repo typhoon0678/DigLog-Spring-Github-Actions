@@ -61,7 +61,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             if (!member.getPlatform().equals(oAuth2ResponseDTO.getPlatform())) {
 
                 // 플랫폼이 같지 않은 경우 -> 중복 회원가입을 막기 위해 throw Exception
-                // todo: 에러 구현 (SIGNUP_PLATFORM_DUPLICATED, SERVER로 회원가입 되어있습니다. 다른 로그인 방법으로 시도해주세요.)
+                // todo: 에러 구현 (SIGNUP_PLATFORM_DUPLICATED, member.getPlatform()로 회원가입 되어있습니다. 다른 로그인 방법으로 시도해주세요.)
             }
 
             memberRepository.save(member);

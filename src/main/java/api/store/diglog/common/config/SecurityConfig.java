@@ -27,6 +27,8 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -35,12 +37,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        String[] memberApi = {"/api/member/username"};
+        String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
+        String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/verify/**"};
 
         http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(memberApi).authenticated()
-                        .anyRequest().permitAll())
+                        .requestMatchers(swaggerApi).permitAll()
+                        .requestMatchers(memberApi).permitAll()
+                        .anyRequest().authenticated())
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -58,7 +62,11 @@ public class SecurityConfig {
                         .userInfoEndpoint(userinfo -> userinfo
                                 .userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler)
-                        .failureHandler(customOAuth2FailureHandler));
+                        .failureHandler(customOAuth2FailureHandler))
+
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint));
 
         return http.build();
     }
