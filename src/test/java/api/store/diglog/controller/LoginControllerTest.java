@@ -1,0 +1,191 @@
+package api.store.diglog.controller;
+
+import api.store.diglog.common.auth.JWTUtil;
+import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.dto.login.LoginRequestDTO;
+import api.store.diglog.model.dto.login.LogoutRequestDTO;
+import api.store.diglog.model.entity.Member;
+import api.store.diglog.repository.MemberRepository;
+import api.store.diglog.repository.RefreshRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Set;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
+class LoginControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private RefreshRepository refreshRepository;
+    @Autowired
+    private JWTUtil jwtUtil;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void beforeEach() {
+        memberRepository.save(getMember());
+    }
+
+    @AfterEach
+    void afterEach() {
+        memberRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("로그인 성공 시 accessToken, refreshToken, 멤버 정보를 return 한다.")
+    void login() throws Exception {
+        // given
+        LoginRequestDTO dto = new LoginRequestDTO();
+        dto.setEmail("test@example.com");
+        dto.setPassword("qwer1234");
+
+        // when
+        MvcResult result = setMockMvc("post", "/api/member/login", dto);
+        MockHttpServletResponse response = result.getResponse();
+        String content = result.getResponse().getContentAsString();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getHeader("Authorization")).startsWith("Bearer ");
+        assertThat(response.getCookie("refreshToken").getValue()).isNotNull();
+        assertThat(content).contains("test@example.com");
+        assertThat(content).contains("username");
+        assertThat(content).contains("ROLE_USER");
+    }
+
+    @Test
+    @DisplayName("이메일이 일치하지 않는 경우 에러를 반환한다.")
+    void login2() throws Exception {
+        // given
+        LoginRequestDTO dto = new LoginRequestDTO();
+        dto.setEmail("test2222@example.com");
+        dto.setPassword("qwer1234");
+
+        // when
+        MvcResult result = setMockMvc("post", "/api/member/login", dto);
+        MockHttpServletResponse response = result.getResponse();
+        String content = result.getResponse().getContentAsString();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    @DisplayName("비밀번호가 일치하지 않는 경우 에러를 반환한다.")
+    void login3() throws Exception {
+        // given
+        LoginRequestDTO dto = new LoginRequestDTO();
+        dto.setEmail("test@example.com");
+        dto.setPassword("qwer5678");
+
+        // when
+        MvcResult result = setMockMvc("post", "/api/member/login", dto);
+        MockHttpServletResponse response = result.getResponse();
+        String content = result.getResponse().getContentAsString();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    @DisplayName("로그아웃 시 유효기간이 0인 refreshToken을 return 한다.")
+    void logout() throws Exception {
+        // given
+        LogoutRequestDTO dto = new LogoutRequestDTO();
+        dto.setEmail("test@example.com");
+
+        // when
+        MvcResult result = setMockMvc("post", "/api/member/logout", dto);
+        MockHttpServletResponse response = result.getResponse();
+        String content = result.getResponse().getContentAsString();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getCookie("refreshToken").getValue()).isNotNull();
+    }
+
+    private MvcResult setMockMvc(String httpMethod, String api, Object dto) throws Exception {
+        if (httpMethod.equals("post")) {
+            return mockMvc.perform(post(api)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andReturn();
+        } else if (httpMethod.equals("get")) {
+            return mockMvc.perform(get(api)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andReturn();
+        }
+        return null;
+    }
+
+    @Test
+    @DisplayName("토큰을 포함하여 accessToken을 요청하면 accessToken과 멤버 정보를 return 한다.")
+    void refresh() throws Exception {
+        // given
+        Cookie refreshTokenCookie = jwtUtil.generateRefreshCookie(getMember());
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/member/refresh")
+                        .cookie(refreshTokenCookie))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        String content = result.getResponse().getContentAsString();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getHeader("Authorization")).startsWith("Bearer ");
+        assertThat(content).contains("test@example.com");
+        assertThat(content).contains("username");
+        assertThat(content).contains("ROLE_USER");
+    }
+
+    @Test
+    @DisplayName("토큰이 없는 경우 오류를 반환한다.")
+    void refresh2() throws Exception {
+        // given
+        // when
+        MvcResult result = mockMvc.perform(get("/api/member/refresh"))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        String content = result.getResponse().getContentAsString();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    private Member getMember() {
+        return Member.builder()
+                .email("test@example.com")
+                .username("username")
+                .password(passwordEncoder.encode("qwer1234"))
+                .roles(Set.of(Role.ROLE_USER))
+                .build();
+    }
+}
