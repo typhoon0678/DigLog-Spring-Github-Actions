@@ -126,7 +126,6 @@ class EmailVerificationControllerTest {
         // then
         setMockMvc("/api/verify/signup", dto)
                 .andExpect(status().isOk());
-
     }
 
     @Test
