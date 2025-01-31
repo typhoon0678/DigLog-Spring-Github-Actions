@@ -92,7 +92,6 @@ class EmailVerificationControllerTest {
 
         // when
         // then
-
         setMockMvc("/api/verify/code", dto)
                 .andExpect(status().is4xxClientError());
         setMockMvc("/api/verify/code", dto2)
@@ -117,6 +116,8 @@ class EmailVerificationControllerTest {
     @DisplayName("회원가입 정보를 입력하면 회원가입이 완료된다.")
     void verifyAndSignup() throws Exception {
         // given
+        emailVerificationRepository.updateVerifiedTrue("test@example.com");
+
         EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
         dto.setEmail("test@example.com");
         dto.setPassword("qwer1234");
@@ -132,15 +133,17 @@ class EmailVerificationControllerTest {
     @DisplayName("입력 정보가 잘못된 경우 에러를 띄운다.")
     void verifyAndSignup2() throws Exception {
         // given
-        EmailVerificationSignupRequest emailVerificationSignupRequest = new EmailVerificationSignupRequest();
-        emailVerificationSignupRequest.setEmail("test@example.com");
-        emailVerificationSignupRequest.setPassword("qwer1234");
-        emailVerificationSignupRequest.setCode("123456");
+        emailVerificationRepository.updateVerifiedTrue("test@example.com");
+
+        EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
+        dto.setEmail("test@example.com");
+        dto.setPassword("qwer1234");
+        dto.setCode("567890");
 
         // when
         // then
-        setMockMvc("/api/verify/signup", emailVerificationSignupRequest)
-                .andExpect(status().isOk());
+        setMockMvc("/api/verify/signup", dto)
+                .andExpect(status().is4xxClientError());
     }
 
     private ResultActions setMockMvc(String api, Object dto) throws Exception {

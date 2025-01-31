@@ -167,7 +167,7 @@ class LoginControllerTest {
     }
 
     @Test
-    @DisplayName("토큰이 없는 경우 오류를 반환한다.")
+    @DisplayName("토큰이 없는 경우 멤버 정보가 없는 Response를 반환한다.")
     void refresh2() throws Exception {
         // given
         // when
@@ -177,7 +177,7 @@ class LoginControllerTest {
         String content = result.getResponse().getContentAsString();
 
         // then
-        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(content).contains("401");
     }
 
     private Member getMember() {

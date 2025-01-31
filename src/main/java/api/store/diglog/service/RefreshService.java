@@ -47,7 +47,7 @@ public class RefreshService {
     }
 
     public boolean isValid(String refreshToken) {
-        return !jwtUtil.validateToken(refreshToken) || isExists(refreshToken);
+        return jwtUtil.validateToken(refreshToken) && isExists(refreshToken);
     }
 
     @Transactional
