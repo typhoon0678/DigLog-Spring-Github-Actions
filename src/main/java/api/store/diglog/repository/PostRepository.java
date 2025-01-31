@@ -1,0 +1,9 @@
+package api.store.diglog.repository;
+
+import api.store.diglog.model.entity.Post;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface PostRepository extends JpaRepository<Post, UUID> {
+}
