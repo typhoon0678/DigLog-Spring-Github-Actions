@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class EmailVerificationRequestDTO {
+public class EmailVerificationRequest {
 
     private String email;
     private String code;

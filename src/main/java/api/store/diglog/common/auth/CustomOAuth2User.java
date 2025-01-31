@@ -1,6 +1,6 @@
 package api.store.diglog.common.auth;
 
-import api.store.diglog.model.dto.member.MemberInfoResponseDTO;
+import api.store.diglog.model.dto.member.MemberInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
 
-    private final MemberInfoResponseDTO memberInfoResponseDTO;
+    private final MemberInfoResponse memberInfoResponse;
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -22,17 +22,17 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return memberInfoResponseDTO.getRoles().stream()
+        return memberInfoResponse.getRoles().stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 
     @Override
     public String getName() {
-        return memberInfoResponseDTO.getEmail();
+        return memberInfoResponse.getEmail();
     }
 
     public String getUsername() {
-        return memberInfoResponseDTO.getUsername();
+        return memberInfoResponse.getUsername();
     }
 }

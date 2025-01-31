@@ -2,6 +2,8 @@ package api.store.diglog.service;
 
 import java.util.stream.Collectors;
 
+import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.exception.ErrorCode;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.vo.login.TokenVO;
 import api.store.diglog.model.vo.member.MemberInfoVO;
@@ -45,14 +47,14 @@ public class RefreshService {
     }
 
     public boolean isValid(String refreshToken) {
-        return !jwtUtil.validateToken(refreshToken) || isExists(refreshToken);
+        return jwtUtil.validateToken(refreshToken) && isExists(refreshToken);
     }
 
     @Transactional
     public TokenVO getNewToken(String refreshToken) {
         MemberInfoVO memberInfoVO = jwtUtil.getMemberInfo(refreshToken);
         Member member = memberRepository.findByEmail(memberInfoVO.getEmail())
-                .orElseThrow(); // todo: 에러 구현 (MEMBER_EMAIL_NOT_FOUND, 해당 이메일을 가진 회원이 없습니다.)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_EMAIL_NOT_FOUND));
 
         String newAccessToken = jwtUtil.generateAccessToken(member);
 

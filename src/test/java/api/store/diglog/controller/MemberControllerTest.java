@@ -2,7 +2,7 @@ package api.store.diglog.controller;
 
 import api.store.diglog.common.auth.JWTUtil;
 import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.member.MemberUsernameRequestDTO;
+import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,7 +57,7 @@ class MemberControllerTest {
     @DisplayName("username 변경 요청을 성공한다.")
     void updateUsername() throws Exception {
         // given
-        MemberUsernameRequestDTO dto = new MemberUsernameRequestDTO();
+        MemberUsernameRequest dto = new MemberUsernameRequest();
         dto.setUsername("newUsername");
 
         // when

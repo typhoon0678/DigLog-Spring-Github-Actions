@@ -4,11 +4,11 @@ import api.store.diglog.model.constant.Platform;
 
 import java.util.Map;
 
-public class KakaoResponseDTO implements OAuth2ResponseDTO {
+public class KakaoResponse implements OAuth2Response {
 
     private final Map<String, Object> attribute;
 
-    public KakaoResponseDTO(Map<String, Object> attribute) {
+    public KakaoResponse(Map<String, Object> attribute) {
         this.attribute = (Map<String, Object>) attribute.get("kakao_account");
     }
 

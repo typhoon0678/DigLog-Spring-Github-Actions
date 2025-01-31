@@ -13,6 +13,7 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
 
     Optional<EmailVerification> findByEmail(String email);
 
+    @Transactional
     void deleteAllByEmail(String email);
 
     @Modifying

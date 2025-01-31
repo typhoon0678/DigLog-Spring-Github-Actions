@@ -1,9 +1,10 @@
 package api.store.diglog.service;
 
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationRequestDTO;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequestDTO;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
 import api.store.diglog.model.entity.EmailVerification;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.EmailVerificationRepository;
@@ -21,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -60,7 +60,7 @@ class EmailVerificationServiceTest {
         @DisplayName("코드를 인증하면 verified = true로 설정한다.")
         void success() {
             // given
-            EmailVerificationRequestDTO dto = EmailVerificationRequestDTO.builder()
+            EmailVerificationRequest dto = EmailVerificationRequest.builder()
                     .email(EMAIL)
                     .code(CODE)
                     .build();
@@ -84,7 +84,7 @@ class EmailVerificationServiceTest {
             // given
             EmailVerification emailVerification = getEmailVerification(EMAIL, CODE, false, createdAt);
 
-            EmailVerificationRequestDTO dto = EmailVerificationRequestDTO.builder()
+            EmailVerificationRequest dto = EmailVerificationRequest.builder()
                     .email(testEmail)
                     .code(testCode)
                     .build();
@@ -101,9 +101,9 @@ class EmailVerificationServiceTest {
 
         static Stream<Arguments> provideCheckCode() {
             return Stream.of(
-                    Arguments.of(INVALID_CREATED_AT, EMAIL, CODE, IllegalArgumentException.class),
-                    Arguments.of(CREATED_AT, INVALID_EMAIL, CODE, IllegalArgumentException.class),
-                    Arguments.of(CREATED_AT, EMAIL, INVALID_CODE, IllegalArgumentException.class) // todo: 에러 class 수정
+                    Arguments.of(INVALID_CREATED_AT, EMAIL, CODE, CustomException.class),
+                    Arguments.of(CREATED_AT, INVALID_EMAIL, CODE, CustomException.class),
+                    Arguments.of(CREATED_AT, EMAIL, INVALID_CODE, CustomException.class) // todo: 에러 class 수정
             );
         }
     }
@@ -125,7 +125,7 @@ class EmailVerificationServiceTest {
             // given
             LocalDateTime createdAt = LocalDateTime.now().minusMinutes(19);
 
-            EmailVerificationSignupRequestDTO dto = new EmailVerificationSignupRequestDTO();
+            EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
             dto.setEmail(EMAIL);
             dto.setPassword(PASSWORD);
             dto.setCode(CODE);
@@ -159,7 +159,7 @@ class EmailVerificationServiceTest {
             // given
             EmailVerification emailVerification = getEmailVerification(EMAIL, CODE, isVerified, createdAt);
 
-            EmailVerificationSignupRequestDTO dto = new EmailVerificationSignupRequestDTO();
+            EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
             dto.setEmail(testEmail);
             dto.setPassword(PASSWORD);
             dto.setCode(testCode);
@@ -176,10 +176,10 @@ class EmailVerificationServiceTest {
 
         private static Stream<Arguments> provideVerifyAndSignupTest() {
             return Stream.of(
-                    Arguments.of(false, INVALID_CREATED_AT, EMAIL, CODE, IllegalArgumentException.class),
-                    Arguments.of(true, INVALID_CREATED_AT, EMAIL, CODE, IllegalArgumentException.class),
-                    Arguments.of(true, CREATED_AT, INVALID_EMAIL, CODE, IllegalArgumentException.class),
-                    Arguments.of(true, CREATED_AT, EMAIL, INVALID_CODE, IllegalArgumentException.class)
+                    Arguments.of(false, INVALID_CREATED_AT, EMAIL, CODE, CustomException.class),
+                    Arguments.of(true, INVALID_CREATED_AT, EMAIL, CODE, CustomException.class),
+                    Arguments.of(true, CREATED_AT, INVALID_EMAIL, CODE, CustomException.class),
+                    Arguments.of(true, CREATED_AT, EMAIL, INVALID_CODE, CustomException.class)
             );
         }
     }

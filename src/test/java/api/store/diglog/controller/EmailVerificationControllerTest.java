@@ -1,7 +1,7 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.model.dto.emailVerification.EmailVerificationRequestDTO;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequestDTO;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
 import api.store.diglog.model.entity.EmailVerification;
 import api.store.diglog.repository.EmailVerificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +52,7 @@ class EmailVerificationControllerTest {
     @DisplayName("verified = false인 인증 코드를 인증하면 verified = true로 변경된다.")
     void checkCode() throws Exception {
         // given
-        EmailVerificationRequestDTO dto = EmailVerificationRequestDTO.builder()
+        EmailVerificationRequest dto = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .code("123456")
                 .build();
@@ -67,7 +67,7 @@ class EmailVerificationControllerTest {
     @DisplayName("해당 이메일의 인증코드가 없는 경우에 에러를 띄운다.")
     void checkCode2() throws Exception {
         // given
-        EmailVerificationRequestDTO dto = EmailVerificationRequestDTO.builder()
+        EmailVerificationRequest dto = EmailVerificationRequest.builder()
                 .email("test222@example.com")
                 .code("123456")
                 .build();
@@ -82,17 +82,16 @@ class EmailVerificationControllerTest {
     @DisplayName("입력 정보가 잘못된 경우 에러를 띄운다.")
     void checkCode3() throws Exception {
         // given
-        EmailVerificationRequestDTO dto = EmailVerificationRequestDTO.builder()
+        EmailVerificationRequest dto = EmailVerificationRequest.builder()
                 .code("123456")
                 .build();
 
-        EmailVerificationRequestDTO dto2 = EmailVerificationRequestDTO.builder()
+        EmailVerificationRequest dto2 = EmailVerificationRequest.builder()
                 .email("test@example.com")
                 .build();
 
         // when
         // then
-
         setMockMvc("/api/verify/code", dto)
                 .andExpect(status().is4xxClientError());
         setMockMvc("/api/verify/code", dto2)
@@ -103,7 +102,7 @@ class EmailVerificationControllerTest {
     @DisplayName("인증코드가 일치하지 않은 경우에 에러를 띄운다.")
     void checkCode4() throws Exception {
         // given
-        EmailVerificationRequestDTO dto = EmailVerificationRequestDTO.builder()
+        EmailVerificationRequest dto = EmailVerificationRequest.builder()
                 .code("567890")
                 .build();
 
@@ -117,7 +116,9 @@ class EmailVerificationControllerTest {
     @DisplayName("회원가입 정보를 입력하면 회원가입이 완료된다.")
     void verifyAndSignup() throws Exception {
         // given
-        EmailVerificationSignupRequestDTO dto = new EmailVerificationSignupRequestDTO();
+        emailVerificationRepository.updateVerifiedTrue("test@example.com");
+
+        EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
         dto.setEmail("test@example.com");
         dto.setPassword("qwer1234");
         dto.setCode("123456");
@@ -132,15 +133,17 @@ class EmailVerificationControllerTest {
     @DisplayName("입력 정보가 잘못된 경우 에러를 띄운다.")
     void verifyAndSignup2() throws Exception {
         // given
-        EmailVerificationSignupRequestDTO emailVerificationSignupRequestDTO = new EmailVerificationSignupRequestDTO();
-        emailVerificationSignupRequestDTO.setEmail("test@example.com");
-        emailVerificationSignupRequestDTO.setPassword("qwer1234");
-        emailVerificationSignupRequestDTO.setCode("123456");
+        emailVerificationRepository.updateVerifiedTrue("test@example.com");
+
+        EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
+        dto.setEmail("test@example.com");
+        dto.setPassword("qwer1234");
+        dto.setCode("567890");
 
         // when
         // then
-        setMockMvc("/api/verify/signup", emailVerificationSignupRequestDTO)
-                .andExpect(status().isOk());
+        setMockMvc("/api/verify/signup", dto)
+                .andExpect(status().is4xxClientError());
     }
 
     private ResultActions setMockMvc(String api, Object dto) throws Exception {
