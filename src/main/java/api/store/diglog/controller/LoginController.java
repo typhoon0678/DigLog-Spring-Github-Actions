@@ -2,9 +2,9 @@ package api.store.diglog.controller;
 
 import api.store.diglog.common.auth.JWTUtil;
 import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.login.LoginRequestDTO;
-import api.store.diglog.model.dto.login.LogoutRequestDTO;
-import api.store.diglog.model.dto.member.MemberInfoResponseDTO;
+import api.store.diglog.model.dto.login.LoginRequest;
+import api.store.diglog.model.dto.login.LogoutRequest;
+import api.store.diglog.model.dto.member.MemberInfoResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.vo.login.TokenVO;
 import api.store.diglog.service.MemberService;
@@ -28,9 +28,9 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(
-            @RequestBody LoginRequestDTO loginRequestDTO,
+            @RequestBody LoginRequest loginRequest,
             HttpServletResponse response) {
-        Member member = memberService.login(loginRequestDTO);
+        Member member = memberService.login(loginRequest);
 
         String accessToken = jwtUtil.generateAccessToken(member);
         response.addHeader("Authorization", "Bearer " + accessToken);
@@ -39,22 +39,22 @@ public class LoginController {
         response.addCookie(refreshTokenCookie);
         refreshService.save(member.getEmail(), refreshTokenCookie.getValue());
 
-        MemberInfoResponseDTO memberInfoResponseDTO = MemberInfoResponseDTO.builder()
+        MemberInfoResponse memberInfoResponse = MemberInfoResponse.builder()
                 .status(200)
                 .email(member.getEmail())
                 .username(member.getUsername())
                 .roles(member.getRoles().stream().map(Role::getRole).collect(Collectors.toSet()))
                 .build();
 
-        return ResponseEntity.ok().body(memberInfoResponseDTO);
+        return ResponseEntity.ok().body(memberInfoResponse);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-            @RequestBody LogoutRequestDTO logoutRequestDTO,
+            @RequestBody LogoutRequest logoutRequest,
             HttpServletResponse response) {
         response.addCookie(jwtUtil.generateLogoutCookie());
-        refreshService.delete(logoutRequestDTO.getEmail());
+        refreshService.delete(logoutRequest.getEmail());
 
         return ResponseEntity.ok().build();
     }
@@ -64,13 +64,13 @@ public class LoginController {
             @CookieValue(value = "refreshToken", defaultValue = "")
             String refreshToken,
             HttpServletResponse response) {
-        MemberInfoResponseDTO memberInfoResponseDTO;
+        MemberInfoResponse memberInfoResponse;
 
         if (!refreshService.isValid(refreshToken)) {
-            memberInfoResponseDTO = MemberInfoResponseDTO.builder()
+            memberInfoResponse = MemberInfoResponse.builder()
                     .status(401)
                     .build();
-            return ResponseEntity.ok().body(memberInfoResponseDTO);
+            return ResponseEntity.ok().body(memberInfoResponse);
         }
 
         TokenVO tokenVO = refreshService.getNewToken(refreshToken);
@@ -81,13 +81,13 @@ public class LoginController {
             response.addCookie(tokenVO.getRefreshTokenCookie());
         }
 
-        memberInfoResponseDTO = MemberInfoResponseDTO.builder()
+        memberInfoResponse = MemberInfoResponse.builder()
                 .status(200)
                 .email(tokenVO.getEmail())
                 .username(tokenVO.getUsername())
                 .roles(tokenVO.getRoles())
                 .build();
 
-        return ResponseEntity.ok().body(memberInfoResponseDTO);
+        return ResponseEntity.ok().body(memberInfoResponse);
     }
 }

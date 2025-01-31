@@ -1,9 +1,10 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.model.dto.emailVerification.EmailVerificationCodeRequestDTO;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationRequestDTO;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequestDTO;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationCodeRequest;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
 import api.store.diglog.service.EmailVerificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,22 +20,22 @@ public class EmailVerificationController {
     private final EmailVerificationService emailVerificationService;
 
     @PostMapping
-    public ResponseEntity<?> sendMail(@RequestBody EmailVerificationCodeRequestDTO emailVerificationCodeRequestDTO) {
-        emailVerificationService.sendMail(emailVerificationCodeRequestDTO.getEmail());
+    public ResponseEntity<?> sendMail(@RequestBody @Valid EmailVerificationCodeRequest emailVerificationCodeRequest) {
+        emailVerificationService.sendMail(emailVerificationCodeRequest.getEmail());
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/code")
-    public ResponseEntity<?> checkCode(@RequestBody EmailVerificationRequestDTO emailVerificationRequestDTO) {
-        emailVerificationService.checkCode(emailVerificationRequestDTO);
+    public ResponseEntity<?> checkCode(@RequestBody EmailVerificationRequest emailVerificationRequest) {
+        emailVerificationService.checkCode(emailVerificationRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> verifyAndSignup(@RequestBody EmailVerificationSignupRequestDTO signupRequestDTO) {
-        emailVerificationService.verifyAndSignup(signupRequestDTO);
+    public ResponseEntity<?> verifyAndSignup(@RequestBody @Valid EmailVerificationSignupRequest signupRequest) {
+        emailVerificationService.verifyAndSignup(signupRequest);
 
         return ResponseEntity.ok().build();
     }

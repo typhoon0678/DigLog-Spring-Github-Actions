@@ -1,9 +1,10 @@
 package api.store.diglog.service;
 
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationRequestDTO;
-import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequestDTO;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
+import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
 import api.store.diglog.model.entity.EmailVerification;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.EmailVerificationRepository;
@@ -22,6 +23,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import static api.store.diglog.common.exception.ErrorCode.*;
+
 @Service
 @RequiredArgsConstructor
 public class EmailVerificationService {
@@ -36,7 +39,7 @@ public class EmailVerificationService {
 
     public void sendMail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
-            // todo: 에러 구현 (SIGNUP_MEMBER_EXISTS, 이미 가입된 회원입니다.)
+            throw new CustomException(SIGNUP_MEMBER_EXISTS);
         }
 
         emailVerificationRepository.deleteAllByEmail(email);
@@ -69,46 +72,46 @@ public class EmailVerificationService {
 
             javaMailSender.send(message);
         } catch (MessagingException e) {
-            // todo: 에러 구현 (SIGNUP_MAIL_SEND_FAILED, 메일 발송 중 오류가 발생하였습니다.)
+            throw new CustomException(SIGNUP_MAIL_SEND_FAILED);
         }
     }
 
-    public void checkCode(EmailVerificationRequestDTO emailVerificationRequestDTO) {
-        String email = emailVerificationRequestDTO.getEmail();
-        String code = emailVerificationRequestDTO.getCode();
+    public void checkCode(EmailVerificationRequest emailVerificationRequest) {
+        String email = emailVerificationRequest.getEmail();
+        String code = emailVerificationRequest.getCode();
 
         EmailVerification emailVerification = emailVerificationRepository.findByEmail(email)
-                .orElseThrow(); // todo: 에러 구현 (SIGNUP_CODE_NOT_EXISTS, 해당 이메일에 대한 인증 코드가 없습니다.)
+                .orElseThrow(() -> new CustomException(SIGNUP_CODE_NOT_EXISTS));
 
         if (!emailVerification.getCode().equals(code)) {
-            // todo: 에러 구현 (SIGNUP_CODE_NOT_MATCHED, 인증 코드가 일치하지 않습니다.)
+            throw new CustomException(SIGNUP_CODE_NOT_MATCHED);
         }
 
         if (emailVerification.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
-            // todo: 에러 구현 (SIGNUP_CODE_EXPIRED, 코드 유효기간이 만료되었습니다.)
+            throw new CustomException(SIGNUP_CODE_EXPIRED);
         }
 
         emailVerificationRepository.updateVerifiedTrue(email);
     }
 
     @Transactional
-    public void verifyAndSignup(EmailVerificationSignupRequestDTO signupRequestDTO) {
-        String email = signupRequestDTO.getEmail();
-        String code = signupRequestDTO.getCode();
+    public void verifyAndSignup(EmailVerificationSignupRequest signupRequest) {
+        String email = signupRequest.getEmail();
+        String code = signupRequest.getCode();
 
         EmailVerification emailVerification = emailVerificationRepository.findByEmail(email)
-                .orElseThrow(); // todo: 에러 구현 (SIGNUP_CODE_NOT_EXISTS, 해당 이메일에 대한 인증 코드가 없습니다.)
+                .orElseThrow(() -> new CustomException(SIGNUP_CODE_NOT_EXISTS));
 
         if (!emailVerification.isVerified()) {
-            // todo: 에러 구현 (SIGNUP_CODE_NOT_VERIFIED, 인증되지 않은 코드입니다.)
+            throw new CustomException(SIGNUP_CODE_NOT_VERIFIED);
         }
 
         if (!emailVerification.getCreatedAt().plusMinutes(20).isAfter(LocalDateTime.now())) {
-            // todo: 에러 구현 (SIGNUP_CODE_NOT_VERIFIED, 코드 유효기간이 만료되었습니다.)
+            throw new CustomException(SIGNUP_CODE_NOT_VERIFIED);
         }
 
         if (!emailVerification.getCode().equals(code)) {
-            // todo: 에러 구현 (SIGNUP_CODE_NOT_MATCHED, 인증 코드가 일치하지 않습니다.)
+            throw new CustomException(SIGNUP_CODE_NOT_MATCHED);
         }
 
         emailVerificationRepository.deleteAllByEmail(email);
@@ -116,7 +119,7 @@ public class EmailVerificationService {
         Member member = Member.builder()
                 .email(email)
                 .username(email.split("@")[0])
-                .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
+                .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .roles(new HashSet<>(Set.of(Role.ROLE_USER)))
                 .platform(Platform.SERVER)
                 .build();

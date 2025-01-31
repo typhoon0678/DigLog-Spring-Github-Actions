@@ -1,14 +1,17 @@
 package api.store.diglog.service;
 
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.common.util.SecurityUtil;
-import api.store.diglog.model.dto.login.LoginRequestDTO;
-import api.store.diglog.model.dto.member.MemberProfileResponseDTO;
-import api.store.diglog.model.dto.member.MemberUsernameRequestDTO;
+import api.store.diglog.model.dto.login.LoginRequest;
+import api.store.diglog.model.dto.member.MemberProfileResponse;
+import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static api.store.diglog.common.exception.ErrorCode.LOGIN_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -17,28 +20,28 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Member login(LoginRequestDTO loginRequestDTO) {
-        Member member = memberRepository.findByEmail(loginRequestDTO.getEmail())
-                .orElseThrow(); // todo: 에러 구현 (LOGIN_FAILED, 이메일 또는 비밀번호가 일치하지 않습니다.)
+    public Member login(LoginRequest loginRequest) {
+        Member member = memberRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new CustomException(LOGIN_FAILED));
 
-        if (!passwordEncoder.matches(loginRequestDTO.getPassword(), member.getPassword())) {
-            // todo: 에러 구현 (LOGIN_FAILED, 이메일 또는 비밀번호가 일치하지 않습니다.)
+        if (!passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
+            throw new CustomException(LOGIN_FAILED);
         }
 
         return member;
     }
 
-    public void updateUsername(MemberUsernameRequestDTO memberUsernameRequestDTO) {
+    public void updateUsername(MemberUsernameRequest memberUsernameRequest) {
         String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
-        memberRepository.updateUsername(memberUsernameRequestDTO.getUsername(), email);
+        memberRepository.updateUsername(memberUsernameRequest.getUsername(), email);
     }
 
-    public MemberProfileResponseDTO getProfile() {
+    public MemberProfileResponse getProfile() {
         String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(); // todo: 에러 구현 (LOGIN_FAILED, 이메일 또는 비밀번호가 일치하지 않습니다.)
+                .orElseThrow(() -> new CustomException(LOGIN_FAILED));
 
-        return MemberProfileResponseDTO.builder()
+        return MemberProfileResponse.builder()
                 .email(email)
                 .username(member.getUsername())
                 .build();

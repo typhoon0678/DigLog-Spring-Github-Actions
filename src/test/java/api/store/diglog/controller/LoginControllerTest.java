@@ -2,8 +2,8 @@ package api.store.diglog.controller;
 
 import api.store.diglog.common.auth.JWTUtil;
 import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.login.LoginRequestDTO;
-import api.store.diglog.model.dto.login.LogoutRequestDTO;
+import api.store.diglog.model.dto.login.LoginRequest;
+import api.store.diglog.model.dto.login.LogoutRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.RefreshRepository;
@@ -61,7 +61,7 @@ class LoginControllerTest {
     @DisplayName("로그인 성공 시 accessToken, refreshToken, 멤버 정보를 return 한다.")
     void login() throws Exception {
         // given
-        LoginRequestDTO dto = new LoginRequestDTO();
+        LoginRequest dto = new LoginRequest();
         dto.setEmail("test@example.com");
         dto.setPassword("qwer1234");
 
@@ -83,7 +83,7 @@ class LoginControllerTest {
     @DisplayName("이메일이 일치하지 않는 경우 에러를 반환한다.")
     void login2() throws Exception {
         // given
-        LoginRequestDTO dto = new LoginRequestDTO();
+        LoginRequest dto = new LoginRequest();
         dto.setEmail("test2222@example.com");
         dto.setPassword("qwer1234");
 
@@ -100,7 +100,7 @@ class LoginControllerTest {
     @DisplayName("비밀번호가 일치하지 않는 경우 에러를 반환한다.")
     void login3() throws Exception {
         // given
-        LoginRequestDTO dto = new LoginRequestDTO();
+        LoginRequest dto = new LoginRequest();
         dto.setEmail("test@example.com");
         dto.setPassword("qwer5678");
 
@@ -117,7 +117,7 @@ class LoginControllerTest {
     @DisplayName("로그아웃 시 유효기간이 0인 refreshToken을 return 한다.")
     void logout() throws Exception {
         // given
-        LogoutRequestDTO dto = new LogoutRequestDTO();
+        LogoutRequest dto = new LogoutRequest();
         dto.setEmail("test@example.com");
 
         // when

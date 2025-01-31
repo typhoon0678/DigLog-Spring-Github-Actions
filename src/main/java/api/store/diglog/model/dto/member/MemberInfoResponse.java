@@ -7,7 +7,7 @@ import java.util.Set;
 
 @Data
 @Builder
-public class MemberInfoResponseDTO {
+public class MemberInfoResponse {
 
     private int status;
     private String email;

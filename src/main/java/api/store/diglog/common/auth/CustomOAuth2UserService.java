@@ -1,9 +1,11 @@
 package api.store.diglog.common.auth;
 
+import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.exception.ErrorCode;
 import api.store.diglog.model.constant.Role;
-import api.store.diglog.model.dto.login.KakaoResponseDTO;
-import api.store.diglog.model.dto.login.OAuth2ResponseDTO;
-import api.store.diglog.model.dto.member.MemberInfoResponseDTO;
+import api.store.diglog.model.dto.login.KakaoResponse;
+import api.store.diglog.model.dto.login.OAuth2Response;
+import api.store.diglog.model.dto.member.MemberInfoResponse;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,26 +33,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        OAuth2ResponseDTO oAuth2ResponseDTO;
+        OAuth2Response oAuth2Response;
 
         switch (registrationId) {
-            case "kakao" -> oAuth2ResponseDTO = new KakaoResponseDTO(oAuth2User.getAttributes());
+            case "kakao" -> oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
             default -> {
                 return null;
             }
         }
 
-        Optional<Member> optionalMember = memberRepository.findByEmail(oAuth2ResponseDTO.getEmail());
+        Optional<Member> optionalMember = memberRepository.findByEmail(oAuth2Response.getEmail());
         Member member;
         if (optionalMember.isEmpty()) {
 
             // 회원 정보가 없는 경우 저장
             member = Member.builder()
-                    .email(oAuth2ResponseDTO.getEmail())
-                    .username(oAuth2ResponseDTO.getName())
+                    .email(oAuth2Response.getEmail())
+                    .username(oAuth2Response.getName())
                     .password(UUID.randomUUID().toString())
                     .roles(new HashSet<>(Set.of(Role.ROLE_USER)))
-                    .platform(oAuth2ResponseDTO.getPlatform())
+                    .platform(oAuth2Response.getPlatform())
                     .build();
 
             memberRepository.save(member);
@@ -58,21 +60,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             member = optionalMember.get();
 
-            if (!member.getPlatform().equals(oAuth2ResponseDTO.getPlatform())) {
-
-                // 플랫폼이 같지 않은 경우 -> 중복 회원가입을 막기 위해 throw Exception
-                // todo: 에러 구현 (SIGNUP_PLATFORM_DUPLICATED, member.getPlatform()로 회원가입 되어있습니다. 다른 로그인 방법으로 시도해주세요.)
+            if (!member.getPlatform().equals(oAuth2Response.getPlatform())) {
+                // 플랫폼이 같지 않은 경우 중복 회원가입 방지
+                throw new CustomException(ErrorCode.SIGNUP_PLATFORM_DUPLICATED);
             }
 
             memberRepository.save(member);
         }
 
-        MemberInfoResponseDTO memberInfoResponseDTO = MemberInfoResponseDTO.builder()
+        MemberInfoResponse memberInfoResponse = MemberInfoResponse.builder()
                 .email(member.getEmail())
                 .username(member.getUsername())
                 .roles(member.getRoles().stream().map(Role::getRole).collect(Collectors.toSet()))
                 .build();
 
-        return new CustomOAuth2User(memberInfoResponseDTO);
+        return new CustomOAuth2User(memberInfoResponse);
     }
 }

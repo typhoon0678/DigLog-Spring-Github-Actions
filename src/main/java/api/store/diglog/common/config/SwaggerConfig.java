@@ -24,7 +24,7 @@ public class SwaggerConfig {
                 .type(SecurityScheme.Type.HTTP)
                 .bearerFormat("JWT")
                 .scheme("bearer")
-                .description("Bearer를 제외한 accessToken을 입력");
+                .description("'Bearer '를 제외한 accessToken 입력");
     }
 
     private Info apiInfo() {
