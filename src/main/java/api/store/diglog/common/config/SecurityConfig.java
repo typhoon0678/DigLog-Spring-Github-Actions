@@ -3,6 +3,7 @@ package api.store.diglog.common.config;
 import api.store.diglog.common.auth.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,11 +40,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
         String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/verify/**"};
+        String[] postGetApi = {"/api/post", "/api/post/*"};
 
         http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(swaggerApi).permitAll()
                         .requestMatchers(memberApi).permitAll()
+                        .requestMatchers(HttpMethod.GET, postGetApi).permitAll()
                         .anyRequest().authenticated())
 
                 .csrf(AbstractHttpConfigurer::disable)

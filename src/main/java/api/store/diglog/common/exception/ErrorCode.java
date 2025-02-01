@@ -24,6 +24,13 @@ public enum ErrorCode {
     // S3
     S3_WRONG_FILE(BAD_REQUEST, "이미지 Byte를 얻는데 실패했습니다. 이미지를 다시 확인해주세요."),
     S3_IMAGE_UPLOAD_FAILED(INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+    S3_IMAGE_DELETE_FAILED(INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다."),
+
+    // Post
+    POST_NOT_FOUND(BAD_REQUEST, "해당 게시글이 없습니다."),
+    POST_INVALID_SORT(BAD_REQUEST, "정렬 조건이 올바르지 않습니다. (정렬 옵션 : createdAt, updatedAt)"),
+    POST_DELETE_FAILED(BAD_REQUEST, "게시글 삭제가 완료되지 않았습니다."),
+    POST_NO_PERMISSION(BAD_REQUEST, "게시글 수정 권한이 없습니다."),
 
     ;
 

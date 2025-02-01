@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -27,7 +28,7 @@ public class S3Util {
     private String region;
 
     // 이미지를 업로드하고 이미지 url을 반환
-    public String uploadS3(MultipartFile file) {
+    public String uploadImage(MultipartFile file) {
         String filePath = getFilePath(file);
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -62,5 +63,32 @@ public class S3Util {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.S3_WRONG_FILE);
         }
+    }
+
+    public void deleteImages(List<String> urls) {
+        try {
+            List<ObjectIdentifier> objectIdentifiers = urls.stream()
+                    .map(url -> ObjectIdentifier.builder()
+                            .key(getKey(url))
+                            .build())
+                    .toList();
+            Delete delete = Delete.builder()
+                    .objects(objectIdentifiers)
+                    .build();
+            DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucket)
+                    .delete(delete)
+                    .build();
+
+            if (!objectIdentifiers.isEmpty()) {
+                s3Client.deleteObjects(deleteObjectsRequest);
+            }
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.S3_IMAGE_DELETE_FAILED);
+        }
+    }
+
+    private String getKey(String url) {
+        return url.substring(48);
     }
 }
