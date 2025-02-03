@@ -45,7 +45,7 @@ class MemberControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        memberRepository.save(getMember());
+        memberRepository.save(defaultMember());
     }
 
     @AfterEach
@@ -91,7 +91,7 @@ class MemberControllerTest {
         assertThat(content).contains("username");
     }
 
-    private Member getMember() {
+    private Member defaultMember() {
         return Member.builder()
                 .email("test@example.com")
                 .password(passwordEncoder.encode("qwer1234"))
@@ -102,6 +102,6 @@ class MemberControllerTest {
     }
 
     private String getAuthorization() {
-        return "Bearer " + jwtUtil.generateAccessToken(getMember());
+        return "Bearer " + jwtUtil.generateAccessToken(defaultMember());
     }
 }

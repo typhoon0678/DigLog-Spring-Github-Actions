@@ -1,10 +1,7 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
-import api.store.diglog.model.dto.post.PostListRequest;
-import api.store.diglog.model.dto.post.PostRequest;
-import api.store.diglog.model.dto.post.PostResponse;
-import api.store.diglog.model.dto.post.PostUpdateRequest;
+import api.store.diglog.model.dto.post.*;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
@@ -107,6 +104,13 @@ public class PostService {
         } catch (Exception e) {
             throw new CustomException(POST_INVALID_SORT);
         }
+    }
+
+    public Page<PostResponse> getPostsTag(PostListTagRequest postListTagRequest) {
+        Pageable pageable = PageRequest.of(postListTagRequest.getPage(), postListTagRequest.getSize(), Sort.by("createdAt").descending());
+
+        return postRepository.findAllByTagNameAndIsDeletedFalse(postListTagRequest.getTagName(), pageable)
+                .map(PostResponse::new);
     }
 
     public void delete(UUID id) {

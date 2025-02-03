@@ -18,6 +18,9 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findAllByIsDeletedFalse(Pageable pageable);
 
+    @Query("SELECT p FROM Post p JOIN p.tags t WHERE LOWER(t.name) = :tagName AND p.isDeleted = false")
+    Page<Post> findAllByTagNameAndIsDeletedFalse(String tagName, Pageable pageable);
+
     @Modifying
     @Transactional
     @Query("UPDATE Post p SET p.isDeleted = true WHERE p.id = :id AND p.member = :member")

@@ -1,9 +1,6 @@
 package api.store.diglog.controller;
 
-import api.store.diglog.model.dto.post.PostListRequest;
-import api.store.diglog.model.dto.post.PostRequest;
-import api.store.diglog.model.dto.post.PostResponse;
-import api.store.diglog.model.dto.post.PostUpdateRequest;
+import api.store.diglog.model.dto.post.*;
 import api.store.diglog.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -44,6 +41,13 @@ public class PostController {
     @GetMapping
     public ResponseEntity<?> getPosts(@ParameterObject @ModelAttribute PostListRequest postListRequest) {
         Page<PostResponse> postResponses = postService.getPosts(postListRequest);
+
+        return ResponseEntity.ok().body(postResponses);
+    }
+
+    @GetMapping("/tag")
+    public ResponseEntity<?> getPostsTag(@ParameterObject @ModelAttribute PostListTagRequest postListTagRequest) {
+        Page<PostResponse> postResponses = postService.getPostsTag(postListTagRequest);
 
         return ResponseEntity.ok().body(postResponses);
     }
