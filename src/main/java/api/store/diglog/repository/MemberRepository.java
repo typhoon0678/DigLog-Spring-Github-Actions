@@ -18,5 +18,7 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     @Query("UPDATE Member m SET m.username = :username WHERE m.email = :email")
     void updateUsername(String username, String email);
 
+    int countByUsername(String username);
+
     void deleteAllByEmail(String email);
 }

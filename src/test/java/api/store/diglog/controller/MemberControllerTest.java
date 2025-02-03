@@ -88,7 +88,7 @@ class MemberControllerTest {
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(data.get("email").asText()).isEqualTo("test@example.com");
-        assertThat(data.get("username").asText()).isEqualTo("username");
+        assertThat(data.get("username").asText()).isEqualTo("test");
     }
 
     private Member defaultMember(String email) {

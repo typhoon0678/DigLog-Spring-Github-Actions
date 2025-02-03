@@ -45,11 +45,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<Member> optionalMember = memberRepository.findByEmail(oAuth2Response.getEmail());
         Member member;
         if (optionalMember.isEmpty()) {
+            String username = oAuth2Response.getName();
+            if (memberRepository.countByUsername(username) > 0) {
+                username = username + "_" + UUID.randomUUID().toString().substring(0, 4);
+            }
 
             // 회원 정보가 없는 경우 저장
             member = Member.builder()
                     .email(oAuth2Response.getEmail())
-                    .username(oAuth2Response.getName())
+                    .username(username)
                     .password(UUID.randomUUID().toString())
                     .roles(new HashSet<>(Set.of(Role.ROLE_USER)))
                     .platform(oAuth2Response.getPlatform())

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
@@ -116,14 +117,26 @@ public class EmailVerificationService {
 
         emailVerificationRepository.deleteAllByEmail(email);
 
+        String username = generateUsernameByEmail(email);
+
         Member member = Member.builder()
                 .email(email)
-                .username(email.split("@")[0])
+                .username(username)
                 .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .roles(new HashSet<>(Set.of(Role.ROLE_USER)))
                 .platform(Platform.SERVER)
                 .build();
 
         memberRepository.save(member);
+    }
+
+    private String generateUsernameByEmail(String email) {
+        String username = email.split("@")[0];
+
+        if (memberRepository.countByUsername(username) > 0) {
+            return username + "_" + UUID.randomUUID().toString().substring(0, 4);
+        }
+
+        return username;
     }
 }

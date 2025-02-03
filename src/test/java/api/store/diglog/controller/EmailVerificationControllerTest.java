@@ -4,6 +4,7 @@ import api.store.diglog.model.dto.emailVerification.EmailVerificationRequest;
 import api.store.diglog.model.dto.emailVerification.EmailVerificationSignupRequest;
 import api.store.diglog.model.entity.EmailVerification;
 import api.store.diglog.repository.EmailVerificationRepository;
+import api.store.diglog.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,8 @@ class EmailVerificationControllerTest {
 
     @Autowired
     private EmailVerificationRepository emailVerificationRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void beforeEach() {
@@ -46,6 +49,7 @@ class EmailVerificationControllerTest {
     @AfterEach
     void afterEach() {
         emailVerificationRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Test
