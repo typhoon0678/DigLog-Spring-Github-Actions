@@ -5,6 +5,7 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.repository.MemberRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,7 @@ class MemberControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        memberRepository.save(defaultMember());
+        memberRepository.save(defaultMember("test@example.com"));
     }
 
     @AfterEach
@@ -67,7 +68,6 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andReturn();
         MockHttpServletResponse response = result.getResponse();
-        String content = result.getResponse().getContentAsString();
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
@@ -83,25 +83,25 @@ class MemberControllerTest {
                         .header("Authorization", getAuthorization()))
                 .andReturn();
         MockHttpServletResponse response = result.getResponse();
-        String content = result.getResponse().getContentAsString();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(content).contains("test@example.com");
-        assertThat(content).contains("username");
+        assertThat(data.get("email").asText()).isEqualTo("test@example.com");
+        assertThat(data.get("username").asText()).isEqualTo("username");
     }
 
-    private Member defaultMember() {
+    private Member defaultMember(String email) {
         return Member.builder()
-                .email("test@example.com")
+                .email(email)
                 .password(passwordEncoder.encode("qwer1234"))
                 .roles(Set.of(Role.ROLE_USER))
-                .username("username")
+                .username(email.split("@")[0])
                 .isDeleted(false)
                 .build();
     }
 
     private String getAuthorization() {
-        return "Bearer " + jwtUtil.generateAccessToken(defaultMember());
+        return "Bearer " + jwtUtil.generateAccessToken(defaultMember("test@example.com"));
     }
 }

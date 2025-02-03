@@ -132,6 +132,20 @@ public class JWTUtil implements InitializingBean {
         return false;
     }
 
+    public boolean validateRefreshToken(String refreshToken) {
+        if (!StringUtils.hasText(refreshToken)) {
+            return false;
+        }
+
+        try {
+            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(refreshToken);
+            return true;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException | ExpiredJwtException ignored) {
+        }
+
+        return false;
+    }
+
     // refresh 토큰 유효기간 확인
     public boolean shouldRenewRefresh(String jwt) {
         Date expirationDate = Jwts.parser()
