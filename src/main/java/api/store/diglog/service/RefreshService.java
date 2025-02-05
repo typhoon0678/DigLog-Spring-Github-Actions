@@ -38,6 +38,7 @@ public class RefreshService {
         refreshRepository.save(refresh);
     }
 
+    @Transactional
     public void delete(String email) {
         refreshRepository.deleteAllByEmail(email);
     }
