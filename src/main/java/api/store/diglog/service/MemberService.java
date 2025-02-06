@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static api.store.diglog.common.exception.ErrorCode.LOGIN_FAILED;
+import static api.store.diglog.common.exception.ErrorCode.MEMBER_EMAIL_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,13 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+
+    // 현재 api 요청을 보낸 Member
+    public Member getCurrentMember() {
+        String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(MEMBER_EMAIL_NOT_FOUND));
+    }
 
     public Member login(LoginRequest loginRequest) {
         Member member = memberRepository.findByEmail(loginRequest.getEmail())

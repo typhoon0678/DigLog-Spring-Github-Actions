@@ -1,0 +1,31 @@
+package api.store.diglog.model.dto.post;
+
+import api.store.diglog.model.entity.Post;
+import api.store.diglog.model.entity.Tag;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Data
+public class PostUpdateRequest {
+
+    private UUID id;
+    private String title;
+    private String content;
+    private List<String> tagNames;
+    private List<String> urls;
+
+    public Post toPost(Post currentPost, List<Tag> tags) {
+        return Post.builder()
+                .id(id)
+                .member(currentPost.getMember())
+                .title(title)
+                .content(content)
+                .tags(tags)
+                .createdAt(currentPost.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+}

@@ -38,6 +38,7 @@ public class RefreshService {
         refreshRepository.save(refresh);
     }
 
+    @Transactional
     public void delete(String email) {
         refreshRepository.deleteAllByEmail(email);
     }
@@ -47,7 +48,7 @@ public class RefreshService {
     }
 
     public boolean isValid(String refreshToken) {
-        return jwtUtil.validateToken(refreshToken) && isExists(refreshToken);
+        return jwtUtil.validateRefreshToken(refreshToken) && isExists(refreshToken);
     }
 
     @Transactional

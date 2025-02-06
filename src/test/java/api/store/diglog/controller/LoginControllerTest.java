@@ -5,8 +5,10 @@ import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.login.LoginRequest;
 import api.store.diglog.model.dto.login.LogoutRequest;
 import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.entity.Refresh;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.RefreshRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
@@ -68,15 +70,15 @@ class LoginControllerTest {
         // when
         MvcResult result = setMockMvc("post", "/api/member/login", dto);
         MockHttpServletResponse response = result.getResponse();
-        String content = result.getResponse().getContentAsString();
+        JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString());
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getHeader("Authorization")).startsWith("Bearer ");
         assertThat(response.getCookie("refreshToken").getValue()).isNotNull();
-        assertThat(content).contains("test@example.com");
-        assertThat(content).contains("username");
-        assertThat(content).contains("ROLE_USER");
+        assertThat(data.get("email").asText()).isEqualTo("test@example.com");
+        assertThat(data.get("username").asText()).isEqualTo("username");
+        assertThat(data.get("roles").get(0).asText()).isEqualTo("ROLE_USER");
     }
 
     @Test
@@ -150,6 +152,11 @@ class LoginControllerTest {
     void refresh() throws Exception {
         // given
         Cookie refreshTokenCookie = jwtUtil.generateRefreshCookie(getMember());
+        refreshRepository.deleteAll();
+        refreshRepository.save(Refresh.builder()
+                .email(getMember().getEmail())
+                .jwt(refreshTokenCookie.getValue())
+                .build());
 
         // when
         MvcResult result = mockMvc.perform(get("/api/member/refresh")
@@ -157,13 +164,14 @@ class LoginControllerTest {
                 .andReturn();
         MockHttpServletResponse response = result.getResponse();
         String content = result.getResponse().getContentAsString();
+        JsonNode data = objectMapper.readTree(content);
 
         // then
-        assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getHeader("Authorization")).startsWith("Bearer ");
-        assertThat(content).contains("test@example.com");
-        assertThat(content).contains("username");
-        assertThat(content).contains("ROLE_USER");
+        assertThat(data.get("status").asInt()).isEqualTo(200);
+        assertThat(data.get("email").asText()).isEqualTo("test@example.com");
+        assertThat(data.get("username").asText()).isEqualTo("username");
+        assertThat(data.get("roles").get(0).asText()).isEqualTo("ROLE_USER");
     }
 
     @Test
@@ -173,11 +181,10 @@ class LoginControllerTest {
         // when
         MvcResult result = mockMvc.perform(get("/api/member/refresh"))
                 .andReturn();
-        MockHttpServletResponse response = result.getResponse();
-        String content = result.getResponse().getContentAsString();
+        JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString());
 
         // then
-        assertThat(content).contains("401");
+        assertThat(data.get("status").asInt()).isEqualTo(401);
     }
 
     private Member getMember() {
