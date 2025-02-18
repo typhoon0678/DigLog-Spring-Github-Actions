@@ -1,5 +1,8 @@
 package api.store.diglog.model.dto.folder;
 
+import java.util.List;
+import java.util.UUID;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -7,10 +10,9 @@ import lombok.NoArgsConstructor;
 @Getter
 public class FolderCreateRequest {
 
-	private int tmpId;
+	private UUID id;
 	private String title;
 	private int depth;
 	private int orderIndex;
-	private int tmpParentId;
-
+	private int parentOrderIndex;
 }

@@ -1,8 +1,8 @@
 package api.store.diglog.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -28,13 +28,13 @@ public class FolderService {
 	private final MemberService memberService;
 
 	@Transactional
-	public List<FolderResponse> createFolders(List<FolderCreateRequest> folderCreateRequests) {
+	public List<FolderResponse> createAndUpdateFolders(List<FolderCreateRequest> folderCreateRequests) {
 		Member member = memberService.getCurrentMember();
-		Map<Integer, Folder> allFolders = new HashMap<>();
+		Map<Integer, Folder> allFolders = new TreeMap<>();
 
 		IntStream.range(0, MAX_FOLDER_DEPTH)
 			.forEach(depth -> {
-				Map<Integer, Folder> foldersAtCurrentDepth = createFoldersByDepth(
+				Map<Integer, Folder> foldersAtCurrentDepth = createAndUpdateFoldersByDepth(
 					folderCreateRequests,
 					member,
 					depth,
@@ -50,7 +50,7 @@ public class FolderService {
 			.toList();
 	}
 
-	private Map<Integer, Folder> createFoldersByDepth(
+	private Map<Integer, Folder> createAndUpdateFoldersByDepth(
 		List<FolderCreateRequest> requests,
 		Member member,
 		int depth,
@@ -59,23 +59,28 @@ public class FolderService {
 		return requests.stream()
 			.filter(request -> request.getDepth() == depth)
 			.collect(Collectors.toMap(
-				FolderCreateRequest::getTmpId,
-				request -> createFolder(request, member, existingFolders)
+				FolderCreateRequest::getOrderIndex,
+				request -> createAndUpdateFolder(request, member, existingFolders)
 			));
 	}
 
-	private Folder createFolder(
+	private Folder createAndUpdateFolder(
 		FolderCreateRequest folderCreateRequest,
 		Member member,
 		Map<Integer, Folder> existingFolders
 	) {
 		Folder parentFolder = null;
 		if (folderCreateRequest.getDepth() > 0) {
-			parentFolder = existingFolders.get(folderCreateRequest.getTmpParentId());
+			parentFolder = existingFolders.get(folderCreateRequest.getParentOrderIndex());
+		}
+
+		UUID folderId = folderCreateRequest.getId();
+		if (folderId == null) {
+			folderId = UUID.randomUUID();
 		}
 
 		return Folder.builder()
-			.id(UUID.randomUUID())
+			.id(folderId)
 			.member(member)
 			.title(folderCreateRequest.getTitle())
 			.depth(folderCreateRequest.getDepth())
