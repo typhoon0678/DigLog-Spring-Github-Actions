@@ -16,6 +16,11 @@ public class ErrorResponse {
         this.message = errorCode.getMessage();
     }
 
+    public ErrorResponse(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
     // Validation 에러 -> ErrorResponse
     public ErrorResponse(MethodArgumentNotValidException e) {
         ObjectError objectError = e.getBindingResult().getAllErrors().getFirst();
