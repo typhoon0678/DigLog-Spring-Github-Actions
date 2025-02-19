@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.service.FolderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,7 +22,8 @@ public class FolderController {
 	private final FolderService folderService;
 
 	@PostMapping
-	public ResponseEntity<List<FolderResponse>> create(@RequestBody List<FolderCreateRequest> folderCreateRequests) {
+	public ResponseEntity<List<FolderResponse>> create(
+		@RequestBody @Valid List<FolderCreateRequest> folderCreateRequests) {
 
 		List<FolderResponse> folderResponses = folderService.createAndUpdateFolders(folderCreateRequests);
 		return ResponseEntity.ok().body(folderResponses);
