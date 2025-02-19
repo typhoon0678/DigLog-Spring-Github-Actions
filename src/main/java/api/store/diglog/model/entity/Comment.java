@@ -1,52 +1,53 @@
 package api.store.diglog.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Post {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "post_tag",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private List<Tag> tags;
-
-    @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column
     private String content;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isDeleted = false;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Comment parentComment;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder
+    public Comment(Post post, Member member, String content, boolean isDeleted, Comment parentComment) {
+        this.post = post;
+        this.member = member;
+        this.content = content;
+        this.isDeleted = isDeleted;
+        this.parentComment = parentComment;
+    }
 }

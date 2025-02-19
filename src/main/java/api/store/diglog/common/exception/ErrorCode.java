@@ -32,6 +32,10 @@ public enum ErrorCode {
     POST_DELETE_FAILED(FORBIDDEN, "게시글 삭제가 완료되지 않았습니다."),
     POST_NO_PERMISSION(FORBIDDEN, "게시글 수정 권한이 없습니다."),
 
+    // Comment
+    COMMENT_PARENT_ID_NOT_FOUND(BAD_REQUEST, "대댓글을 달기 위해 지정한 댓글을 찾을 수 없습니다."),
+    COMMENT_MAX_DEPTH_EXCEEDED(BAD_REQUEST, "대댓글의 최대 깊이를 초과했습니다."),
+
     ;
 
     private final HttpStatus status;
