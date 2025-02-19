@@ -11,8 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static api.store.diglog.common.exception.ErrorCode.LOGIN_FAILED;
-import static api.store.diglog.common.exception.ErrorCode.MEMBER_EMAIL_NOT_FOUND;
+import java.util.UUID;
+
+import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +52,16 @@ public class MemberService {
 
         return MemberProfileResponse.builder()
                 .email(email)
+                .username(member.getUsername())
+                .build();
+    }
+
+    public MemberProfileResponse getProfile(UUID memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+
+        return MemberProfileResponse.builder()
+                .email(member.getEmail())
                 .username(member.getUsername())
                 .build();
     }
