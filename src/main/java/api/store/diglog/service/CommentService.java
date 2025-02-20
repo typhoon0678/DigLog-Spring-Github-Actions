@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
@@ -27,18 +29,7 @@ public class CommentService {
     public void save(CommentRequest commentRequest) {
         Member member = memberService.getCurrentMember();
         Post post = Post.builder().id(commentRequest.getPostId()).build();
-        Comment parentComment = null;
-
-        if (commentRequest.getParentCommentId() != null) {
-            parentComment = commentRepository.findByIdAndIsDeletedFalse(commentRequest.getParentCommentId())
-                    .orElseThrow(() -> new CustomException(COMMENT_PARENT_ID_NOT_FOUND));
-
-            int MAX_DEPTH = 3;
-            int parentDepth = commentRepository.getDepthByParentCommentId(commentRequest.getParentCommentId(), MAX_DEPTH);
-            if (parentDepth + 1 >= MAX_DEPTH) {
-                throw new CustomException(COMMENT_MAX_DEPTH_EXCEEDED);
-            }
-        }
+        Comment parentComment = getParentComment(commentRequest.getParentCommentId());
 
         Comment comment = Comment.builder()
                 .post(post)
@@ -49,12 +40,30 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
+    private Comment getParentComment(UUID parentCommentId) {
+        if (parentCommentId == null) {
+            return null;
+        }
+
+        Comment parentComment = commentRepository.findByIdAndIsDeletedFalse(parentCommentId)
+                .orElseThrow(() -> new CustomException(COMMENT_PARENT_ID_NOT_FOUND));
+
+        int MAX_DEPTH = 3;
+        int parentDepth = commentRepository.getDepthByParentCommentId(parentCommentId, MAX_DEPTH);
+        if (parentDepth + 1 >= MAX_DEPTH) {
+            throw new CustomException(COMMENT_MAX_DEPTH_EXCEEDED);
+        }
+
+        return parentComment;
+    }
+
     public Page<CommentResponse> getComments(CommentListRequest commentListRequest) {
         Pageable pageable = PageRequest.of(commentListRequest.getPage(), commentListRequest.getSize(), Sort.by("createdAt"));
         Page<Comment> comments = commentRepository.findByPostIdAndParentCommentId(commentListRequest.getPostId(), commentListRequest.getParentCommentId(), pageable);
 
         return comments.map(this::getCommentResponse);
     }
+
     private CommentResponse getCommentResponse(Comment comment) {
         if (comment.isDeleted()) {
             return CommentResponse.builder()
@@ -69,6 +78,7 @@ public class CommentService {
                 .member(memberService.getProfile(comment.getMember().getId()))
                 .isDeleted(false)
                 .createdAt(comment.getCreatedAt())
+                .replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
                 .build();
     }
 }

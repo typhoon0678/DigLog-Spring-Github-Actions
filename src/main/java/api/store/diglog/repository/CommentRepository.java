@@ -13,6 +13,8 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     Optional<Comment> findByIdAndIsDeletedFalse(UUID id);
 
+    int countByParentCommentIdAndIsDeletedFalse(UUID parentCommentId);
+
     // parentId의 depth를 재귀로 계산, maxDepth 이상인 경우 탐색을 종료하고 maxDepth를 리턴
     @Query(value = "WITH RECURSIVE CommentTree AS (" +
             "SELECT id, parent_id, 0 AS depth FROM comment " +

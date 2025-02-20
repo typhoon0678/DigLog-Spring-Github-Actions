@@ -16,4 +16,5 @@ public class CommentResponse {
     private final String content;
     private final boolean isDeleted;
     private final LocalDateTime createdAt;
+    private final int replyCount;
 }
