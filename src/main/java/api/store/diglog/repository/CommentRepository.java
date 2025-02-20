@@ -1,9 +1,11 @@
 package api.store.diglog.repository;
 
 import api.store.diglog.model.entity.Comment;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
@@ -27,4 +29,12 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     int getDepthByParentCommentId(UUID parentCommentId, int maxDepth);
 
     Page<Comment> findByPostIdAndParentCommentId(UUID postId, UUID parentId, Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE comment c " +
+            "JOIN member m ON c.member_id = m.id " +
+            "SET c.is_deleted = TRUE " +
+            "WHERE c.id = :commentId AND m.email = :email", nativeQuery = true)
+    int updateIsDeletedByCommentIdAndEmail(UUID commentId, String email);
 }

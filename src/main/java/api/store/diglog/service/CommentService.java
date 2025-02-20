@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.common.util.SecurityUtil;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
@@ -80,5 +81,15 @@ public class CommentService {
                 .createdAt(comment.getCreatedAt())
                 .replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
                 .build();
+    }
+
+    public void delete(UUID commentId) {
+        String loginEmail = SecurityUtil.getAuthenticationMemberInfo().getEmail();
+
+        int result = commentRepository.updateIsDeletedByCommentIdAndEmail(commentId, loginEmail);
+
+        if (result <= 0) {
+            throw new CustomException(COMMENT_IS_DELETED_NO_CHANGE);
+        }
     }
 }

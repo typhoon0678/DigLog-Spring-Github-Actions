@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.http.HttpStatusCode;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/comment")
 @RequiredArgsConstructor
@@ -29,5 +31,12 @@ public class CommentController {
         Page<CommentResponse> comments = commentService.getComments(commentListRequest);
 
         return ResponseEntity.ok().body(comments);
+    }
+
+    @PatchMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        commentService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
