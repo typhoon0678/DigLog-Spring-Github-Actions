@@ -2,6 +2,7 @@ package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.common.util.SecurityUtil;
+import api.store.diglog.model.dto.comment.CommentMember;
 import api.store.diglog.model.dto.login.LoginRequest;
 import api.store.diglog.model.dto.member.MemberProfileResponse;
 import api.store.diglog.model.dto.member.MemberUsernameRequest;
@@ -56,12 +57,11 @@ public class MemberService {
                 .build();
     }
 
-    public MemberProfileResponse getProfile(UUID memberId) {
+    public CommentMember getCommentMember(UUID memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
 
-        return MemberProfileResponse.builder()
-                .email(member.getEmail())
+        return CommentMember.builder()
                 .username(member.getUsername())
                 .build();
     }

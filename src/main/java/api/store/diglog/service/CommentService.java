@@ -76,7 +76,7 @@ public class CommentService {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .member(memberService.getProfile(comment.getMember().getId()))
+                .member(memberService.getCommentMember(comment.getMember().getId()))
                 .isDeleted(false)
                 .createdAt(comment.getCreatedAt())
                 .replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
