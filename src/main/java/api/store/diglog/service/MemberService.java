@@ -55,7 +55,7 @@ public class MemberService {
         Member member = getCurrentMember();
 
         return MemberProfileResponse.builder()
-                .email(member.getUsername())
+                .email(member.getEmail())
                 .username(member.getUsername())
                 .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
                 .build();
