@@ -28,6 +28,10 @@ public class Post {
     @ManyToOne
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id")
+    private Folder folder;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "post_tag",
