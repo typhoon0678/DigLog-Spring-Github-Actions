@@ -31,6 +31,7 @@ public class Folder {
 
 	private static final int MAX_DEPTH = 3;
 	private static final int MAX_ORDER_INDEX = 100;
+	private static final int MAX_TITLE_LENGTH = 25;
 
 	@Id
 	private UUID id;
@@ -39,7 +40,7 @@ public class Folder {
 	@JoinColumn(name = "member_id")
 	private Member member;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 25)
 	private String title;
 
 	@Column(nullable = false, columnDefinition = "TINYINT(3)")
@@ -57,6 +58,7 @@ public class Folder {
 
 		validateDepth(depth);
 		validateOrderIndex(orderIndex);
+		validateTitleLength(title);
 
 		this.id = id;
 		this.member = member;
@@ -82,6 +84,15 @@ public class Folder {
 			throw new FolderException(
 				FOLDER_OVER_FLOW_ORDER_INDEX.getStatus(),
 				String.format(FOLDER_OVER_FLOW_ORDER_INDEX.getMessage(), MAX_ORDER_INDEX)
+			);
+		}
+	}
+
+	private void validateTitleLength(String title) {
+		if (title.length() > MAX_TITLE_LENGTH) {
+			throw new FolderException(
+				FOLDER_OVER_FLOW_TITLE_LENGTH.getStatus(),
+				String.format(FOLDER_OVER_FLOW_TITLE_LENGTH.getMessage(), MAX_TITLE_LENGTH)
 			);
 		}
 	}
