@@ -44,7 +44,8 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Comment(Post post, Member member, String content, boolean isDeleted, Comment parentComment) {
+    public Comment(UUID id, Post post, Member member, String content, boolean isDeleted, Comment parentComment) {
+        this.id = id;
         this.post = post;
         this.member = member;
         this.content = content;
