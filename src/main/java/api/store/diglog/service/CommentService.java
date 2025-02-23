@@ -84,9 +84,9 @@ public class CommentService {
     }
 
     public void delete(UUID commentId) {
-        String loginEmail = SecurityUtil.getAuthenticationMemberInfo().getEmail();
+        Member member = memberService.getCurrentMember();
 
-        int result = commentRepository.updateIsDeletedByCommentIdAndEmail(commentId, loginEmail);
+        int result = commentRepository.updateIsDeletedByCommentIdAndMemberId(commentId, member.getId());
 
         if (result <= 0) {
             throw new CustomException(COMMENT_IS_DELETED_NO_CHANGE);

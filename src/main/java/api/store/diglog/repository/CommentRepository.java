@@ -33,8 +33,7 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE comment c " +
-            "JOIN member m ON c.member_id = m.id " +
             "SET c.is_deleted = TRUE " +
-            "WHERE c.id = :commentId AND m.email = :email", nativeQuery = true)
-    int updateIsDeletedByCommentIdAndEmail(UUID commentId, String email);
+            "WHERE c.id = :commentId AND c.member_id = :memberId", nativeQuery = true)
+    int updateIsDeletedByCommentIdAndMemberId(UUID commentId, UUID memberId);
 }
