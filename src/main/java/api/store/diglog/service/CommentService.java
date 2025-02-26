@@ -1,7 +1,6 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
-import api.store.diglog.common.util.SecurityUtil;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
