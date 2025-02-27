@@ -4,7 +4,7 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 
 import java.util.UUID;
 
-import api.store.diglog.common.exception.folder.FolderException;
+import api.store.diglog.common.exception.CustomException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -76,10 +76,9 @@ public class Folder {
 	}
 
 	private void validateDepth(int depth) {
-
 		if (depth >= MAX_DEPTH || depth < 0) {
-			throw new FolderException(
-				FOLDER_OVER_FLOW_DEPTH.getStatus(),
+			throw new CustomException(
+				FOLDER_OVER_FLOW_DEPTH,
 				String.format(FOLDER_OVER_FLOW_DEPTH.getMessage(), MAX_DEPTH)
 			);
 		}
@@ -88,8 +87,8 @@ public class Folder {
 
 	private void validateOrderIndex(int orderIndex) {
 		if (orderIndex >= MAX_ORDER_INDEX || orderIndex < 0) {
-			throw new FolderException(
-				FOLDER_OVER_FLOW_ORDER_INDEX.getStatus(),
+			throw new CustomException(
+				FOLDER_OVER_FLOW_ORDER_INDEX,
 				String.format(FOLDER_OVER_FLOW_ORDER_INDEX.getMessage(), MAX_ORDER_INDEX)
 			);
 		}
@@ -97,10 +96,11 @@ public class Folder {
 
 	private void validateTitleLength(String title) {
 		if (title.length() > MAX_TITLE_LENGTH) {
-			throw new FolderException(
-				FOLDER_OVER_FLOW_TITLE_LENGTH.getStatus(),
+			throw new CustomException(
+				FOLDER_OVER_FLOW_TITLE_LENGTH,
 				String.format(FOLDER_OVER_FLOW_TITLE_LENGTH.getMessage(), MAX_TITLE_LENGTH)
 			);
 		}
 	}
+
 }

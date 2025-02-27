@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import api.store.diglog.common.exception.folder.FolderException;
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
@@ -69,8 +69,8 @@ public class FolderService {
 
 		folderCreateRequests.forEach(request -> {
 			if (!uniqueFolders.add(request.getParentOrderIndex() + request.getTitle())) {
-				throw new FolderException(
-					FOLDER_DUPLICATION_TITLE.getStatus(),
+				throw new CustomException(
+					FOLDER_DUPLICATION_TITLE,
 					FOLDER_DUPLICATION_TITLE.getMessage()
 				);
 			}
@@ -79,8 +79,8 @@ public class FolderService {
 
 	private void validateFolderSize(List<FolderCreateRequest> folderCreateRequests) {
 		if (folderCreateRequests.size() > MAX_FOLDER_SIZE) {
-			throw new FolderException(
-				FOLDER_OVER_FLOW_SIZE.getStatus(),
+			throw new CustomException(
+				FOLDER_OVER_FLOW_SIZE,
 				String.format(FOLDER_OVER_FLOW_SIZE.getMessage(), MAX_FOLDER_SIZE)
 			);
 		}
@@ -93,8 +93,8 @@ public class FolderService {
 			.collect(Collectors.toSet());
 
 		if (folderCreateRequests.size() != uniqueOrderIndexes.size()) {
-			throw new FolderException(
-				FOLDER_DUPLICATION_ORDER_INDEX.getStatus(),
+			throw new CustomException(
+				FOLDER_DUPLICATION_ORDER_INDEX,
 				FOLDER_DUPLICATION_ORDER_INDEX.getMessage()
 			);
 		}

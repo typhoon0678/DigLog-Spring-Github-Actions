@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import api.store.diglog.common.exception.folder.FolderException;
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 
@@ -121,7 +121,7 @@ class FolderTest {
 				.orderIndex(2)
 				.parentFolder(null)
 				.build())
-			.isInstanceOf(FolderException.class)
+			.isInstanceOf(CustomException.class)
 			.hasMessage("하위 폴더의 깊이는 3까지 허용됩니다.");
 	}
 
@@ -152,7 +152,7 @@ class FolderTest {
 				.orderIndex(overFlowOrderIndex)
 				.parentFolder(null)
 				.build())
-			.isInstanceOf(FolderException.class)
+			.isInstanceOf(CustomException.class)
 			.hasMessage("최대 폴더 순서(100번)를 초과했습니다.");
 	}
 
@@ -186,7 +186,7 @@ class FolderTest {
 				.orderIndex(0)
 				.parentFolder(null)
 				.build())
-			.isInstanceOf(FolderException.class)
+			.isInstanceOf(CustomException.class)
 			.hasMessage("폴더 제목은 25자 까지만 허용됩니다.");
 	}
 }

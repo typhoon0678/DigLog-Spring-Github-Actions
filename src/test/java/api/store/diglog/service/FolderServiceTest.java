@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import api.store.diglog.common.exception.folder.FolderException;
+import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
@@ -280,7 +280,7 @@ class FolderServiceTest {
 
 		// when then
 		assertThatThrownBy(() -> folderService.createAndUpdateFolders(folderCreateRequests))
-			.isInstanceOf(FolderException.class)
+			.isInstanceOf(CustomException.class)
 			.hasMessage("중복된 폴더 이름이 존재합니다.");
 	}
 
@@ -301,7 +301,7 @@ class FolderServiceTest {
 
 		// when then
 		assertThatThrownBy(() -> folderService.createAndUpdateFolders(folderCreateRequests))
-			.isInstanceOf(FolderException.class)
+			.isInstanceOf(CustomException.class)
 			.hasMessage("최대 폴더의 개수(100개)를 초과했습니다.");
 	}
 
@@ -330,7 +330,7 @@ class FolderServiceTest {
 
 		// when then
 		assertThatThrownBy(() -> folderService.createAndUpdateFolders(folderCreateRequests))
-			.isInstanceOf(FolderException.class)
+			.isInstanceOf(CustomException.class)
 			.hasMessage("중복된 폴더 순서가 존재합니다.");
 	}
 
