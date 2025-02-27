@@ -8,4 +8,5 @@ import lombok.Data;
 public class CommentMember {
 
     private String username;
+    private String profileUrl;
 }

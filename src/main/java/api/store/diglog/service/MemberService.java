@@ -89,6 +89,7 @@ public class MemberService {
 
         return CommentMember.builder()
                 .username(member.getUsername())
+                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
                 .build();
     }
 
