@@ -14,7 +14,7 @@ public class CommentResponse {
     private final CommentMember member;
     private final String content;
     private final boolean isDeleted;
-    private final String taggedMemberUsername;
+    private final String taggedUsername;
     private final LocalDateTime createdAt;
     private final int replyCount;
 }

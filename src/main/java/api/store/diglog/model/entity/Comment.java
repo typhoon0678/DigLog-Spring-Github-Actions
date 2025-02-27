@@ -30,7 +30,7 @@ public class Comment {
     @Column
     private String content;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member taggedMember;
 
     @Column(nullable = false, columnDefinition = "boolean default false")

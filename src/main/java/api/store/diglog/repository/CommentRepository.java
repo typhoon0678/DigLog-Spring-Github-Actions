@@ -28,7 +28,7 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
             "SELECT MAX(depth) FROM CommentTree", nativeQuery = true)
     int getDepthByParentCommentId(UUID parentCommentId, int maxDepth);
 
-    Page<Comment> findByPostIdAndParentCommentId(UUID postId, UUID parentId, Pageable pageable);
+    Page<Comment> findByPostIdAndParentCommentIdAndIsDeletedFalse(UUID postId, UUID parentId, Pageable pageable);
 
     @Modifying
     @Transactional

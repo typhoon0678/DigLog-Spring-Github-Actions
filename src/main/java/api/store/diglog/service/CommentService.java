@@ -32,7 +32,7 @@ public class CommentService {
         Member member = memberService.getCurrentMember();
         Post post = Post.builder().id(commentRequest.getPostId()).build();
         Comment parentComment = getParentComment(commentRequest.getParentCommentId());
-        Member taggedMember = getTaggedMember(commentRequest.getTaggedMemberUsername());
+        Member taggedMember = getTaggedMember(commentRequest.getTaggedUsername());
 
         Comment comment = Comment.builder()
                 .post(post)
@@ -66,31 +66,24 @@ public class CommentService {
 
     public Page<CommentResponse> getComments(CommentListRequest commentListRequest) {
         Pageable pageable = PageRequest.of(commentListRequest.getPage(), commentListRequest.getSize(), Sort.by("createdAt"));
-        Page<Comment> comments = commentRepository.findByPostIdAndParentCommentId(commentListRequest.getPostId(), commentListRequest.getParentCommentId(), pageable);
+        Page<Comment> comments = commentRepository.findByPostIdAndParentCommentIdAndIsDeletedFalse(commentListRequest.getPostId(), commentListRequest.getParentCommentId(), pageable);
 
         return comments.map(this::getCommentResponse);
     }
 
     private CommentResponse getCommentResponse(Comment comment) {
-        if (comment.isDeleted()) {
-            return CommentResponse.builder()
-                    .id(comment.getId())
-                    .isDeleted(true)
-                    .build();
-        }
-
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .member(memberService.getCommentMember(comment.getMember().getId()))
                 .isDeleted(false)
-                .taggedMemberUsername(getTaggedMemberUsername(comment))
+                .taggedUsername(getTaggedUsername(comment))
                 .createdAt(comment.getCreatedAt())
                 .replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
                 .build();
     }
 
-    private String getTaggedMemberUsername(Comment comment) {
+    private String getTaggedUsername(Comment comment) {
         return comment.getTaggedMember() != null
                 ? memberService.findMemberById(comment.getTaggedMember().getId()).getUsername()
                 : null;
