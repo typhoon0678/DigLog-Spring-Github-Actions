@@ -4,6 +4,7 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
+import api.store.diglog.model.dto.comment.CommentUpdateRequest;
 import api.store.diglog.model.entity.Comment;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -197,6 +198,95 @@ class CommentServiceTest {
                     .email(email)
                     .username(username)
                     .build();
+        }
+    }
+
+    @Nested
+    class updateCommentTest {
+
+        private static final UUID COMMENT_ID = UUID.randomUUID();
+        private static final UUID MEMBER_ID = UUID.randomUUID();
+        private static final String CONTENT = "update comment";
+        private static final String TAGGED_USERNAME = "test1";
+        private static final String TAGGED_USERNAME2 = null;
+
+        private static final UUID INVALID_COMMENT_ID = UUID.randomUUID();
+        private static final UUID INVALID_MEMBER_ID = UUID.randomUUID();
+
+        @ParameterizedTest
+        @MethodSource("provideSuccess")
+        @DisplayName("댓글 수정에 성공한다.")
+        void success(String taggedUsername) {
+            // given
+            CommentUpdateRequest dto = new CommentUpdateRequest();
+            dto.setId(COMMENT_ID);
+            dto.setContent(CONTENT);
+            dto.setTaggedUsername(taggedUsername);
+
+            Member member = Member.builder()
+                    .id(MEMBER_ID)
+                    .build();
+            Comment comment = Comment.builder()
+                    .id(COMMENT_ID)
+                    .member(member)
+                    .build();
+
+            when(memberService.getCurrentMember()).thenReturn(member);
+            when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
+
+            // when
+            Throwable throwable = catchThrowable(() -> commentService.update(dto));
+
+            // then
+            assertThat(throwable).isNull();
+            verify(commentRepository, times(1)).findById(any(UUID.class));
+            verify(commentRepository, times(1)).save(any(Comment.class));
+        }
+
+        static Stream<Arguments> provideSuccess() {
+            return Stream.of(
+                    Arguments.of(TAGGED_USERNAME),
+                    Arguments.of(TAGGED_USERNAME2)
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideFail")
+        @DisplayName("댓글 수정에 실패한다.")
+        void fail(UUID commentId, UUID memberId) {
+            // given
+            CommentUpdateRequest dto = new CommentUpdateRequest();
+            dto.setId(commentId);
+            dto.setContent(CONTENT);
+            dto.setTaggedUsername(TAGGED_USERNAME);
+
+            Member member = Member.builder()
+                    .id(memberId)
+                    .build();
+            Member commentMember = Member.builder()
+                    .id(MEMBER_ID)
+                    .build();
+            Comment comment = Comment.builder()
+                    .id(commentId)
+                    .member(commentMember)
+                    .build();
+
+            when(memberService.getCurrentMember()).thenReturn(member);
+            lenient().when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
+            lenient().when(commentRepository.findById(INVALID_COMMENT_ID)).thenReturn(Optional.empty());
+
+            // when
+            Throwable throwable = catchThrowable(() -> commentService.update(dto));
+
+            // then
+            assertThat(throwable).isInstanceOf(CustomException.class);
+        }
+
+        static Stream<Arguments> provideFail() {
+            return Stream.of(
+                    Arguments.of(INVALID_COMMENT_ID, MEMBER_ID),
+                    Arguments.of(COMMENT_ID, INVALID_MEMBER_ID)
+            );
         }
     }
 

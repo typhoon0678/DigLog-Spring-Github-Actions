@@ -3,6 +3,7 @@ package api.store.diglog.controller;
 import api.store.diglog.common.auth.JWTUtil;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.comment.CommentRequest;
+import api.store.diglog.model.dto.comment.CommentUpdateRequest;
 import api.store.diglog.model.entity.Comment;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -248,6 +249,56 @@ class CommentControllerTest {
         // then
         assertThat(data.get("content").get(0).get("member").get("username").asText()).isEqualTo("test1");
         assertThat(data.get("content").get(0).get("content").asText()).isEqualTo("content 0");
+    }
+
+    @Test
+    @DisplayName("댓글 수정에 성공한다.")
+    void update() throws Exception {
+        // given
+        UUID commentId = commentRepository.findAll().get(0).getId();
+
+        CommentUpdateRequest dto = new CommentUpdateRequest();
+        dto.setId(commentId);
+        dto.setContent("update comment");
+        dto.setTaggedUsername(null);
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/comment")
+                        .header("Authorization", getAuthorization("test1@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        Comment comment = commentRepository.findByIdAndIsDeletedFalse(commentId).get();
+        assertThat(comment.getContent()).isEqualTo("update comment");
+        assertThat(comment.getTaggedMember()).isNull();
+    }
+
+    @Test
+    @DisplayName("다른 사용자의 댓글 수정에 실패한다.")
+    void update2() throws Exception {
+        // given
+        UUID commentId = commentRepository.findAll().get(0).getId();
+
+        CommentUpdateRequest dto = new CommentUpdateRequest();
+        dto.setId(commentId);
+        dto.setContent("update comment");
+        dto.setTaggedUsername(null);
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/comment")
+                        .header("Authorization", getAuthorization("test2@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 
     @Test
