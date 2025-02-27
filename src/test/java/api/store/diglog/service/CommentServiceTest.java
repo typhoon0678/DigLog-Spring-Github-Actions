@@ -43,7 +43,7 @@ class CommentServiceTest {
     @Nested
     class SaveTest {
 
-        private static final int MAX_DEPTH = 3;
+        private static final int MAX_DEPTH = 2;
 
         private static final UUID POST_ID = UUID.randomUUID();
         private static final UUID PARENT_COMMENT_ID = UUID.randomUUID();
@@ -138,9 +138,9 @@ class CommentServiceTest {
         private static final UUID PARENT_COMMENT_ID = UUID.randomUUID();
         private static final String CONTENT = "test content";
         private static final Pageable PAGEABLE = PageRequest.of(PAGE, SIZE, Sort.by("createdAt"));
-        private static final int SELECT_SIZE = 3;
+        private static final int SELECT_SIZE = 2;
         private static final String EMAIL = "test1@example.com";
-        private static final String EMAIL2 = "test2@example.com";
+        private static final String USERNAME = "test1";
 
         @ParameterizedTest
         @MethodSource("provideSuccess")
@@ -153,7 +153,8 @@ class CommentServiceTest {
             dto.setSize(SIZE);
             dto.setParentCommentId(parentCommentId);
 
-            lenient().when(commentRepository.findByPostIdAndParentCommentId(POST_ID, parentCommentId, PAGEABLE)).thenReturn(selectResult);
+            when(memberService.findMemberById(any(UUID.class))).thenReturn(getMember(EMAIL, USERNAME));
+            lenient().when(commentRepository.findByPostIdAndParentCommentIdAndIsDeletedFalse(POST_ID, parentCommentId, PAGEABLE)).thenReturn(selectResult);
 
             // when
             Page<CommentResponse> response = commentService.getComments(dto);
@@ -161,10 +162,8 @@ class CommentServiceTest {
             // then
             assertThat(response.getContent().size()).isEqualTo(SELECT_SIZE);
             assertThat(response.getContent().getFirst().getContent()).isEqualTo(CONTENT);
+            assertThat(response.getContent().getFirst().getTaggedUsername()).isEqualTo(USERNAME);
             assertThat(response.getContent().getFirst().isDeleted()).isEqualTo(false);
-            assertThat(response.getContent().get(SELECT_SIZE - 1).isDeleted()).isEqualTo(true);
-            assertThat(response.getContent().get(SELECT_SIZE - 1).getMember()).isNull();
-            assertThat(response.getContent().get(SELECT_SIZE - 1).getContent()).isNull();
         }
 
         static Stream<Arguments> provideSuccess() {
@@ -176,26 +175,27 @@ class CommentServiceTest {
 
         private static Page<Comment> getPageComments(UUID parentCommentId) {
             return new PageImpl<>(List.of(
-                    getComment(getMember(EMAIL), parentCommentId, false),
-                    getComment(getMember(EMAIL), parentCommentId, false),
-                    getComment(getMember(EMAIL2), parentCommentId, true)), PAGEABLE, SELECT_SIZE);
+                    getComment(getMember(EMAIL, USERNAME), parentCommentId),
+                    getComment(getMember(EMAIL, USERNAME), parentCommentId)), PAGEABLE, SELECT_SIZE);
         }
 
-        private static Comment getComment(Member member, UUID parentCommentId, boolean isDeleted) {
+        private static Comment getComment(Member member, UUID parentCommentId) {
             return Comment.builder()
+                    .id(UUID.randomUUID())
                     .post(Post.builder().id(POST_ID).build())
                     .member(member)
                     .parentComment(Comment.builder().id(parentCommentId).build())
                     .content(CONTENT)
-                    .isDeleted(isDeleted)
+                    .taggedMember(member)
+                    .isDeleted(false)
                     .build();
         }
 
-        private static Member getMember(String email) {
+        private static Member getMember(String email, String username) {
             return Member.builder()
                     .id(UUID.randomUUID())
                     .email(email)
-                    .username(email.split("@")[0])
+                    .username(username)
                     .build();
         }
     }

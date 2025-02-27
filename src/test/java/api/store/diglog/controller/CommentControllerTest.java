@@ -55,16 +55,17 @@ class CommentControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        Member member1 = memberRepository.save(getDefaultMember("test1@example.com"));
-        Member member2 = memberRepository.save(getDefaultMember("test2@example.com"));
+        Member member1 = memberRepository.save(getDefaultMember("test1@example.com", false));
+        Member member2 = memberRepository.save(getDefaultMember("test2@example.com", false));
+        Member deletedMember = memberRepository.save(getDefaultMember("test3@example.com", true));
 
         Post post = postRepository.save(getDefaultPost(member1));
 
-        List<Comment> depth0Comments = commentRepository.saveAll(getDefaultComments(member1, post, null));
-        List<Comment> depth1Comments = commentRepository.saveAll(getDefaultComments(member1, post, depth0Comments.get(0)));
-        List<Comment> depth2Comments = commentRepository.saveAll(getDefaultComments(member1, post, depth1Comments.get(0)));
-        List<Comment> deletedDepth0Comments = commentRepository.saveAll(getDefaultComments(member1, post, null, true));
-        List<Comment> deletedDepth1Comments = commentRepository.saveAll(getDefaultComments(member1, post, deletedDepth0Comments.get(0)));
+        List<Comment> depth0Comments = commentRepository.saveAll(getDefaultComments(member1, post, null, member2));
+        List<Comment> depth1Comments = commentRepository.saveAll(getDefaultComments(member1, post, depth0Comments.getFirst(), deletedMember));
+        List<Comment> depth2Comments = commentRepository.saveAll(getDefaultComments(member1, post, depth1Comments.getFirst()));
+        List<Comment> deletedDepth0Comments = commentRepository.saveAll(getDefaultComments(member1, post, null, member2, true));
+        List<Comment> deletedDepth1Comments = commentRepository.saveAll(getDefaultComments(member1, post, deletedDepth0Comments.getFirst()));
     }
 
     @AfterEach
@@ -81,6 +82,29 @@ class CommentControllerTest {
         CommentRequest dto = new CommentRequest();
         dto.setPostId(postRepository.findAll().get(0).getId());
         dto.setContent("test content");
+
+        // when
+        MvcResult result = mockMvc.perform(post("/api/comment")
+                        .header("Authorization", getAuthorization("test1@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        boolean isPresent = commentRepository.findAll().stream().anyMatch(comment -> comment.getContent().equals(dto.getContent()));
+        assertThat(isPresent).isTrue();
+    }
+
+    @Test
+    @DisplayName("멤버를 태그한 댓글 작성에 성공한다.")
+    void saveWithTaggedMember() throws Exception {
+        // given
+        CommentRequest dto = new CommentRequest();
+        dto.setPostId(postRepository.findAll().get(0).getId());
+        dto.setContent("test content");
+        dto.setTaggedUsername("test2");
 
         // when
         MvcResult result = mockMvc.perform(post("/api/comment")
@@ -157,6 +181,7 @@ class CommentControllerTest {
         // then
         assertThat(data.get("content").get(0).get("member").get("username").asText()).isEqualTo("test1");
         assertThat(data.get("content").get(0).get("content").asText()).isEqualTo("content 0");
+        assertThat(data.get("content").get(0).get("taggedUsername").asText()).isEqualTo("test2");
         assertThat(data.get("content").get(1).get("content").asText()).isEqualTo("content 1");
     }
 
@@ -184,7 +209,7 @@ class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("isDeleted = true인 댓글은 null이 담긴 댓글로 return된다.")
+    @DisplayName("isDeleted = true인 댓글은 return되지 않는다.")
     void getComments3() throws Exception {
         // given
         String postId = "postId=" + postRepository.findAll().getLast().getId();
@@ -200,9 +225,7 @@ class CommentControllerTest {
         JsonNode data = objectMapper.readTree(response.getContentAsString());
 
         // then
-        assertThat(data.get("content").get(2).get("member").asText()).isEqualTo("null");
-        assertThat(data.get("content").get(2).get("content").asText()).isEqualTo("null");
-        assertThat(data.get("content").get(2).get("deleted").asBoolean()).isTrue();
+        assertThat(data.get("content").size()).isEqualTo(2);
     }
 
     @Test
@@ -264,12 +287,13 @@ class CommentControllerTest {
         assertThat(response.getStatus()).isEqualTo(400);
     }
 
-    private Member getDefaultMember(String email) {
+    private Member getDefaultMember(String email, boolean isDeleted) {
         return Member.builder()
                 .email(email)
                 .username(email.split("@")[0])
                 .password(passwordEncoder.encode("qwer1234"))
                 .roles(Set.of(Role.ROLE_USER))
+                .isDeleted(isDeleted)
                 .build();
     }
 
@@ -281,7 +305,7 @@ class CommentControllerTest {
                 .build();
     }
 
-    private List<Comment> getDefaultComments(Member member, Post post, Comment parentComment, boolean isDeleted) {
+    private List<Comment> getDefaultComments(Member member, Post post, Comment parentComment, Member taggedMember, boolean isDeleted) {
         List<Comment> comments = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             comments.add(Comment.builder()
@@ -289,6 +313,7 @@ class CommentControllerTest {
                     .member(member)
                     .parentComment(parentComment)
                     .content("content " + i)
+                    .taggedMember(taggedMember)
                     .isDeleted(isDeleted)
                     .build());
         }
@@ -296,11 +321,15 @@ class CommentControllerTest {
         return comments;
     }
 
+    private List<Comment> getDefaultComments(Member member, Post post, Comment parentComment, Member taggedMember) {
+        return getDefaultComments(member, post, parentComment, taggedMember, false);
+    }
+
     private List<Comment> getDefaultComments(Member member, Post post, Comment parentComment) {
-        return getDefaultComments(member, post, parentComment, false);
+        return getDefaultComments(member, post, parentComment, null, false);
     }
 
     private String getAuthorization(String email) {
-        return "Bearer " + jwtUtil.generateAccessToken(getDefaultMember(email));
+        return "Bearer " + jwtUtil.generateAccessToken(getDefaultMember(email, false));
     }
 }
