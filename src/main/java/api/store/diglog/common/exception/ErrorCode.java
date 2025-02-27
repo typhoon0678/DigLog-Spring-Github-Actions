@@ -21,6 +21,7 @@ public enum ErrorCode {
 	SIGNUP_CODE_NOT_MATCHED(BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
 	SIGNUP_CODE_EXPIRED(BAD_REQUEST, "코드 유효기간이 만료되었습니다."),
 	MEMBER_EMAIL_NOT_FOUND(BAD_REQUEST, "해당 이메일을 가진 회원이 없습니다."),
+	MEMBER_USERNAME_NOT_FOUND(BAD_REQUEST, "해당 이름을 가진 회원이 없습니다."),
 
 	// S3
 	S3_WRONG_FILE(BAD_REQUEST, "이미지 Byte를 얻는데 실패했습니다. 이미지를 다시 확인해주세요."),
@@ -38,8 +39,7 @@ public enum ErrorCode {
 	FOLDER_DUPLICATION_TITLE(BAD_REQUEST, "중복된 폴더 이름이 존재합니다."),
 	FOLDER_OVER_FLOW_SIZE(BAD_REQUEST, "최대 폴더의 개수(%d개)를 초과했습니다."),
 	FOLDER_DUPLICATION_ORDER_INDEX(BAD_REQUEST, "중복된 폴더 순서가 존재합니다."),
-	FOLDER_OVER_FLOW_TITLE_LENGTH(BAD_REQUEST, "폴더 제목은 %d자 까지만 허용됩니다.")
-	;
+	FOLDER_OVER_FLOW_TITLE_LENGTH(BAD_REQUEST, "폴더 제목은 %d자 까지만 허용됩니다.");
 
 	private final HttpStatus status;
 	private final String message;
