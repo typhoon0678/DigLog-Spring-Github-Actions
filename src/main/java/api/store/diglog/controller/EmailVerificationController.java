@@ -20,21 +20,21 @@ public class EmailVerificationController {
     private final EmailVerificationService emailVerificationService;
 
     @PostMapping
-    public ResponseEntity<Void> sendMail(@RequestBody @Valid EmailVerificationCodeRequest emailVerificationCodeRequest) {
+    public ResponseEntity<?> sendMail(@RequestBody @Valid EmailVerificationCodeRequest emailVerificationCodeRequest) {
         emailVerificationService.sendMail(emailVerificationCodeRequest.getEmail());
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/code")
-    public ResponseEntity<Void> checkCode(@RequestBody EmailVerificationRequest emailVerificationRequest) {
+    public ResponseEntity<?> checkCode(@RequestBody EmailVerificationRequest emailVerificationRequest) {
         emailVerificationService.checkCode(emailVerificationRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> verifyAndSignup(@RequestBody @Valid EmailVerificationSignupRequest signupRequest) {
+    public ResponseEntity<?> verifyAndSignup(@RequestBody @Valid EmailVerificationSignupRequest signupRequest) {
         emailVerificationService.verifyAndSignup(signupRequest);
 
         return ResponseEntity.ok().build();
