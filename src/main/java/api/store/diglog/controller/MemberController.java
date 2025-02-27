@@ -43,7 +43,7 @@ public class MemberController {
             value = "/image",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ImageUrlResponse> uploadAndSaveImage(@RequestBody ImageRequest imageRequest) {
+    public ResponseEntity<ImageUrlResponse> uploadAndSaveImage(ImageRequest imageRequest) {
         ImageUrlResponse imageUrlResponse = memberService.updateProfileImage(imageRequest);
 
         return ResponseEntity.ok().body(imageUrlResponse);

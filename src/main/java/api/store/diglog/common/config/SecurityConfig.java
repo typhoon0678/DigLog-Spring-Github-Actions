@@ -41,6 +41,7 @@ public class SecurityConfig {
         String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
         String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*", "/api/verify/**"};
         String[] postGetApi = {"/api/post", "/api/post/*"};
+        String[] commentGetApi = {"/api/comment"};
 
         http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(memberApi).permitAll()
 //                        .requestMatchers(HttpMethod.GET, memberGetAuthApi).authenticated()
                         .requestMatchers(HttpMethod.GET, postGetApi).permitAll()
+                        .requestMatchers(HttpMethod.GET, commentGetApi).permitAll()
                         .anyRequest().authenticated())
 
                 .csrf(AbstractHttpConfigurer::disable)

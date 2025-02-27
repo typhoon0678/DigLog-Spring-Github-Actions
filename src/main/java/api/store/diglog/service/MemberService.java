@@ -4,6 +4,7 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.common.util.SecurityUtil;
 import api.store.diglog.model.dto.image.ImageRequest;
 import api.store.diglog.model.dto.image.ImageUrlResponse;
+import api.store.diglog.model.dto.comment.CommentMember;
 import api.store.diglog.model.dto.login.LoginRequest;
 import api.store.diglog.model.dto.member.MemberProfileInfoResponse;
 import api.store.diglog.model.dto.member.MemberProfileResponse;
@@ -80,5 +81,25 @@ public class MemberService {
                 .build();
 
         return imageService.uploadAndSaveImage(imageSaveVO);
+    }
+
+    public CommentMember getCommentMember(UUID memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+
+        return CommentMember.builder()
+                .username(member.getUsername())
+                .profileUrl(imageService.getUrlByRefId(member.getId()).getUrl())
+                .build();
+    }
+
+    public Member findActiveMemberByUsername(String username) {
+        return memberRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
+    }
+
+    public Member findMemberById(UUID memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
     }
 }
