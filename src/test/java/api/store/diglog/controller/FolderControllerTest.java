@@ -49,7 +49,7 @@ class FolderControllerTest {
 	@DisplayName("폴더 목록을 생성할 수 있다.")
 	@Test
 	@WithMockUser(username = EMAIL, password = PASSWORD)
-	void create() throws Exception {
+	void createAndUpdate() throws Exception {
 
 		List<FolderCreateRequest> folderCreateRequests = List.of(
 			FolderCreateRequest.builder()

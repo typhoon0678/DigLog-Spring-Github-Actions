@@ -22,7 +22,7 @@ public class FolderController {
 	private final FolderService folderService;
 
 	@PostMapping
-	public ResponseEntity<List<FolderResponse>> create(
+	public ResponseEntity<List<FolderResponse>> createAndUpdate(
 		@RequestBody @Valid List<FolderCreateRequest> folderCreateRequests) {
 
 		List<FolderResponse> folderResponses = folderService.createAndUpdateFolders(folderCreateRequests);
