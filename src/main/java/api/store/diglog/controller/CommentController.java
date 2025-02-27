@@ -3,6 +3,7 @@ package api.store.diglog.controller;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
+import api.store.diglog.model.dto.comment.CommentUpdateRequest;
 import api.store.diglog.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,13 @@ public class CommentController {
         Page<CommentResponse> comments = commentService.getComments(commentListRequest);
 
         return ResponseEntity.ok().body(comments);
+    }
+
+    @PatchMapping()
+    public ResponseEntity<Void> update(@RequestBody CommentUpdateRequest commentUpdateRequest) {
+        commentService.update(commentUpdateRequest);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/delete/{id}")

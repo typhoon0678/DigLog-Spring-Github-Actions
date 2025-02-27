@@ -4,6 +4,7 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.comment.CommentListRequest;
 import api.store.diglog.model.dto.comment.CommentRequest;
 import api.store.diglog.model.dto.comment.CommentResponse;
+import api.store.diglog.model.dto.comment.CommentUpdateRequest;
 import api.store.diglog.model.entity.Comment;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -87,6 +88,28 @@ public class CommentService {
         return comment.getTaggedMember() != null
                 ? memberService.findMemberById(comment.getTaggedMember().getId()).getUsername()
                 : null;
+    }
+
+    public void update(CommentUpdateRequest commentUpdateRequest) {
+        Member member = memberService.getCurrentMember();
+
+        Comment comment = commentRepository.findById(commentUpdateRequest.getId())
+                .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
+
+        if (!comment.getMember().getId().equals(member.getId())) {
+            throw new CustomException(COMMENT_UPDATE_NO_AUTHORITY);
+        }
+
+        Comment updateComment = Comment.builder()
+                .id(comment.getId())
+                .content(commentUpdateRequest.getContent())
+                .taggedMember(getTaggedMember(commentUpdateRequest.getTaggedUsername()))
+                .post(comment.getPost())
+                .parentComment(comment.getParentComment())
+                .member(member)
+                .isDeleted(comment.isDeleted())
+                .build();
+        commentRepository.save(updateComment);
     }
 
     public void delete(UUID commentId) {
