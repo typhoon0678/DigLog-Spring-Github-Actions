@@ -13,6 +13,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +33,7 @@ public class Folder {
 
 	private static final int MAX_DEPTH = 3;
 	private static final int MAX_ORDER_INDEX = 100;
+	private static final int INDEX_CORRECT_FACTOR = -1;
 	private static final int MAX_TITLE_LENGTH = 25;
 
 	@Id
@@ -43,10 +46,14 @@ public class Folder {
 	@Column(nullable = false, length = 25)
 	private String title;
 
-	@Column(nullable = false, columnDefinition = "TINYINT(3)")
+	@Column(nullable = false)
+	@Min(0)
+	@Max(MAX_DEPTH + INDEX_CORRECT_FACTOR)
 	private int depth;
 
 	@Column(nullable = false)
+	@Min(0)
+	@Max(MAX_ORDER_INDEX + INDEX_CORRECT_FACTOR)
 	private int orderIndex;
 
 	@ManyToOne(fetch = FetchType.LAZY)
