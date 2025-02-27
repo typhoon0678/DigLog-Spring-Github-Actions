@@ -10,4 +10,5 @@ public class CommentRequest {
     private String content;
     private UUID postId;
     private UUID parentCommentId;
+    private String taggedMemberUsername;
 }

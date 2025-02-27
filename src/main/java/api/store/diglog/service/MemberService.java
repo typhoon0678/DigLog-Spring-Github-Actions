@@ -65,4 +65,14 @@ public class MemberService {
                 .username(member.getUsername())
                 .build();
     }
+
+    public Member findActiveMemberByUsername(String username) {
+        return memberRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
+    }
+
+    public Member findMemberById(UUID memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+    }
 }

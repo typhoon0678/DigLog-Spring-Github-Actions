@@ -30,6 +30,9 @@ public class Comment {
     @Column
     private String content;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private Member taggedMember;
+
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isDeleted = false;
 
@@ -44,12 +47,13 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Comment(UUID id, Post post, Member member, String content, boolean isDeleted, Comment parentComment) {
+    public Comment(UUID id, Post post, Member member, String content, boolean isDeleted, Comment parentComment, Member taggedMember) {
         this.id = id;
         this.post = post;
         this.member = member;
         this.content = content;
         this.isDeleted = isDeleted;
         this.parentComment = parentComment;
+        this.taggedMember = taggedMember;
     }
 }

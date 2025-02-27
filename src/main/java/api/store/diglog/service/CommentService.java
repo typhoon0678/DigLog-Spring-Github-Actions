@@ -26,16 +26,20 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberService memberService;
 
+    private static final int MAX_DEPTH = 2;
+
     public void save(CommentRequest commentRequest) {
         Member member = memberService.getCurrentMember();
         Post post = Post.builder().id(commentRequest.getPostId()).build();
         Comment parentComment = getParentComment(commentRequest.getParentCommentId());
+        Member taggedMember = getTaggedMember(commentRequest.getTaggedMemberUsername());
 
         Comment comment = Comment.builder()
                 .post(post)
                 .member(member)
                 .content(commentRequest.getContent())
                 .parentComment(parentComment)
+                .taggedMember(taggedMember)
                 .build();
         commentRepository.save(comment);
     }
@@ -48,13 +52,16 @@ public class CommentService {
         Comment parentComment = commentRepository.findByIdAndIsDeletedFalse(parentCommentId)
                 .orElseThrow(() -> new CustomException(COMMENT_PARENT_ID_NOT_FOUND));
 
-        int MAX_DEPTH = 3;
         int parentDepth = commentRepository.getDepthByParentCommentId(parentCommentId, MAX_DEPTH);
         if (parentDepth + 1 >= MAX_DEPTH) {
             throw new CustomException(COMMENT_MAX_DEPTH_EXCEEDED);
         }
 
         return parentComment;
+    }
+
+    private Member getTaggedMember(String username) {
+        return (username != null) ? memberService.findActiveMemberByUsername(username) : null;
     }
 
     public Page<CommentResponse> getComments(CommentListRequest commentListRequest) {
@@ -77,9 +84,16 @@ public class CommentService {
                 .content(comment.getContent())
                 .member(memberService.getCommentMember(comment.getMember().getId()))
                 .isDeleted(false)
+                .taggedMemberUsername(getTaggedMemberUsername(comment))
                 .createdAt(comment.getCreatedAt())
                 .replyCount(commentRepository.countByParentCommentIdAndIsDeletedFalse(comment.getId()))
                 .build();
+    }
+
+    private String getTaggedMemberUsername(Comment comment) {
+        return comment.getTaggedMember() != null
+                ? memberService.findMemberById(comment.getTaggedMember().getId()).getUsername()
+                : null;
     }
 
     public void delete(UUID commentId) {
