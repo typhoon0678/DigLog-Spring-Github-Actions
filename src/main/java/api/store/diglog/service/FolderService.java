@@ -57,7 +57,9 @@ public class FolderService {
 
 		List<Folder> savedFolders = folderRepository.saveAll(allFolders.values());
 		return savedFolders.stream()
-			.map(FolderResponse::from)
+			.map(folder -> FolderResponse.builder()
+				.folder(folder)
+				.build())
 			.toList();
 	}
 

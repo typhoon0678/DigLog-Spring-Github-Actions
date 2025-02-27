@@ -3,13 +3,11 @@ package api.store.diglog.model.dto.folder;
 import java.util.UUID;
 
 import api.store.diglog.model.entity.Folder;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class FolderResponse {
 
@@ -19,7 +17,8 @@ public class FolderResponse {
 	private int orderIndex;
 	private String parentFolderId;
 
-	public static FolderResponse from(Folder folder) {
+	@Builder
+	private FolderResponse(Folder folder) {
 
 		Folder parentFolder = folder.getParentFolder();
 		String parentFolderId = "none";
@@ -27,13 +26,10 @@ public class FolderResponse {
 			parentFolderId = parentFolder.getId().toString();
 		}
 
-		return new FolderResponse(
-			folder.getId(),
-			folder.getTitle(),
-			folder.getDepth(),
-			folder.getOrderIndex(),
-			parentFolderId
-		);
+		this.folderId = folder.getId();
+		this.title = folder.getTitle();
+		this.depth = folder.getDepth();
+		this.orderIndex = folder.getOrderIndex();
+		this.parentFolderId = parentFolderId;
 	}
-
 }
