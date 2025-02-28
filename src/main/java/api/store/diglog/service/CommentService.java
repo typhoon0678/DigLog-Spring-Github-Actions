@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
@@ -108,6 +109,7 @@ public class CommentService {
                 .parentComment(comment.getParentComment())
                 .member(member)
                 .isDeleted(comment.isDeleted())
+                .createdAt(comment.getCreatedAt())
                 .build();
         commentRepository.save(updateComment);
     }
