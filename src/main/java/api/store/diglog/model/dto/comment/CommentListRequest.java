@@ -11,5 +11,4 @@ public class CommentListRequest {
     private UUID parentCommentId;
     private int page;
     private int size;
-
 }
