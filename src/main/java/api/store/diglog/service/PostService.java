@@ -99,15 +99,15 @@ public class PostService {
         Pageable pageable = getPageable(postListSearchRequest);
         SearchOption option = postListSearchRequest.getOption();
 
-        String title = postListSearchRequest.getKeyword().toLowerCase();
-        String tagName = postListSearchRequest.getKeyword().toLowerCase();
+        String title = postListSearchRequest.getKeyword();
+        String tagName = postListSearchRequest.getKeyword();
 
         return switch (option) {
-            case ALL -> postRepository.findAllByTitleOrTagsNameContainingAndIsDeletedFalse(title, tagName, pageable)
+            case ALL -> postRepository.findAllByTitleContainingIgnoreCaseOrTagsNameContainingIgnoreCaseAndIsDeletedFalse(title, tagName, pageable)
                     .map(PostResponse::new);
-            case TITLE -> postRepository.findAllByTitleContainingAndIsDeletedFalse(title, pageable)
+            case TITLE -> postRepository.findAllByTitleContainingIgnoreCaseAndIsDeletedFalse(title, pageable)
                     .map(PostResponse::new);
-            case TAG -> postRepository.findAllByTagsNameContainingAndIsDeletedFalse(tagName, pageable)
+            case TAG -> postRepository.findAllByTagsNameContainingIgnoreCaseAndIsDeletedFalse(tagName, pageable)
                     .map(PostResponse::new);
         };
     }

@@ -17,8 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
 
     Optional<Member> findByUsername(String username);
 
-    @Query("SELECT m FROM Member m WHERE LOWER(m.username) LIKE CONCAT('%', :username, '%') AND m.isDeleted = false")
-    Optional<Member> findByUsernameAndIsDeletedFalse(String username);
+    Optional<Member> findByUsernameIgnoreCaseAndIsDeletedFalse(String username);
 
     Page<Member> findAllByUsernameContainingAndIsDeletedFalse(String username, Pageable pageable);
 

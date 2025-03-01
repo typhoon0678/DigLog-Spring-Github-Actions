@@ -99,7 +99,7 @@ public class MemberService {
     }
 
     public Member findActiveMemberByUsername(String username) {
-        return memberRepository.findByUsernameAndIsDeletedFalse(username)
+        return memberRepository.findByUsernameIgnoreCaseAndIsDeletedFalse(username)
                 .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
     }
 
@@ -109,7 +109,7 @@ public class MemberService {
     }
 
     public Page<MemberProfileInfoResponse> searchProfileByUsername(MemberProfileSearchRequest memberProfileSearchRequest) {
-        String username = memberProfileSearchRequest.getUsername().toLowerCase();
+        String username = memberProfileSearchRequest.getUsername();
         int page = memberProfileSearchRequest.getPage();
         int size = memberProfileSearchRequest.getSize();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt", "id").descending());
