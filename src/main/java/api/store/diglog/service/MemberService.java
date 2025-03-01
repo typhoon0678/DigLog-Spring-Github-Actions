@@ -8,12 +8,17 @@ import api.store.diglog.model.dto.comment.CommentMember;
 import api.store.diglog.model.dto.login.LoginRequest;
 import api.store.diglog.model.dto.member.MemberProfileInfoResponse;
 import api.store.diglog.model.dto.member.MemberProfileResponse;
+import api.store.diglog.model.dto.member.MemberProfileSearchRequest;
 import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.vo.image.ImageSaveVO;
 import api.store.diglog.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -101,5 +106,18 @@ public class MemberService {
     public Member findMemberById(UUID memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_ID_NOT_FOUND));
+    }
+
+    public Page<MemberProfileInfoResponse> searchProfileByUsername(MemberProfileSearchRequest memberProfileSearchRequest) {
+        String username = memberProfileSearchRequest.getUsername();
+        int page = memberProfileSearchRequest.getPage();
+        int size = memberProfileSearchRequest.getSize();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt", "id").descending());
+
+        return memberRepository.findAllByUsernameContainingAndIsDeletedFalse(username, pageable)
+                .map(member -> {
+                    String profileUrl = imageService.getUrlByRefId(member.getId()).getUrl();
+                    return new MemberProfileInfoResponse(member.getUsername(), profileUrl);
+                });
     }
 }

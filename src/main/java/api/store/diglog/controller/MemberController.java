@@ -4,9 +4,12 @@ import api.store.diglog.model.dto.image.ImageRequest;
 import api.store.diglog.model.dto.image.ImageUrlResponse;
 import api.store.diglog.model.dto.member.MemberProfileInfoResponse;
 import api.store.diglog.model.dto.member.MemberProfileResponse;
+import api.store.diglog.model.dto.member.MemberProfileSearchRequest;
 import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +40,13 @@ public class MemberController {
         MemberProfileInfoResponse memberProfileInfoResponse = memberService.getProfileByUsername(username);
 
         return ResponseEntity.ok().body(memberProfileInfoResponse);
+    }
+
+    @GetMapping("/profile/search")
+    public ResponseEntity<Page<MemberProfileInfoResponse>> searchByUsername(@ParameterObject @ModelAttribute MemberProfileSearchRequest memberProfileSearchRequest) {
+        Page<MemberProfileInfoResponse> memberProfileInfoResponses = memberService.searchProfileByUsername(memberProfileSearchRequest);
+
+        return ResponseEntity.ok().body(memberProfileInfoResponses);
     }
 
     @PostMapping(
