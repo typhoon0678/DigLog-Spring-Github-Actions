@@ -113,7 +113,7 @@ class FolderControllerTest {
 			.willReturn(folderResponses);
 
 		mockMvc.perform(
-				post("/api/folders")
+				put("/api/folders")
 					.with(csrf())
 					.content(objectMapper.writeValueAsString(folderCreateRequests))
 					.contentType(MediaType.APPLICATION_JSON)
