@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class FolderService {
 
 	private static final int MAX_FOLDER_SIZE = 100;
+	private static final String UNDER_BAR_SIGN = "_";
 
 	private final FolderRepository folderRepository;
 	private final MemberService memberService;
@@ -68,7 +69,7 @@ public class FolderService {
 		Set<String> uniqueFolders = new HashSet<>();
 
 		folderCreateRequests.forEach(request -> {
-			if (!uniqueFolders.add(request.getParentOrderIndex() + request.getTitle())) {
+			if (!uniqueFolders.add(request.getParentOrderIndex() + UNDER_BAR_SIGN + request.getTitle())) {
 				throw new CustomException(
 					FOLDER_DUPLICATION_TITLE,
 					FOLDER_DUPLICATION_TITLE.getMessage()
