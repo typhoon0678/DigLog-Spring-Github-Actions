@@ -71,7 +71,7 @@ class MemberControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
-        memberRepository.findByEmail("test@example.com").get().getUsername().equals("newUsername");
+        assertThat(memberRepository.findByEmail("test@example.com").get().getUsername()).isEqualTo("newUsername");
     }
 
     @Test
@@ -119,6 +119,26 @@ class MemberControllerTest {
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(data.get("username").asText()).isEqualTo("test");
+    }
+
+    @Test
+    @DisplayName("username으로 다른 사용자 profile을 검색한다.")
+    void searchProfileByUsername() throws Exception {
+        // given
+        String username = "username=eS"; // test
+        String page = "page=0";
+        String size = "size=10";
+        String parameter = "?" + username + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/member/profile/search" + parameter))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("content").get(0).get("username").asText()).isEqualTo("test");
     }
 
     private Member defaultMember(String email) {
