@@ -99,7 +99,7 @@ public class MemberService {
     }
 
     public Member findActiveMemberByUsername(String username) {
-        return memberRepository.findByUsernameIgnoreCaseAndIsDeletedFalse(username)
+        return memberRepository.findByUsernameAndIsDeletedFalse(username)
                 .orElseThrow(() -> new CustomException(MEMBER_USERNAME_NOT_FOUND));
     }
 
@@ -114,7 +114,7 @@ public class MemberService {
         int size = memberProfileSearchRequest.getSize();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt", "id").descending());
 
-        return memberRepository.findAllByUsernameContainingAndIsDeletedFalse(username, pageable)
+        return memberRepository.findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(username, pageable)
                 .map(member -> {
                     String profileUrl = imageService.getUrlByRefId(member.getId()).getUrl();
                     return new MemberProfileInfoResponse(member.getUsername(), profileUrl);

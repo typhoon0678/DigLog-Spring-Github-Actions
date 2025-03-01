@@ -17,9 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
 
     Optional<Member> findByUsername(String username);
 
-    Optional<Member> findByUsernameIgnoreCaseAndIsDeletedFalse(String username);
+    Optional<Member> findByUsernameAndIsDeletedFalse(String username);
 
-    Page<Member> findAllByUsernameContainingAndIsDeletedFalse(String username, Pageable pageable);
+    Page<Member> findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(String username, Pageable pageable);
 
     @Modifying
     @Transactional

@@ -130,13 +130,6 @@ public class PostService {
         return pageable;
     }
 
-    public Page<PostResponse> getPostsTag(PostListTagRequest postListTagRequest) {
-        Pageable pageable = PageRequest.of(postListTagRequest.getPage(), postListTagRequest.getSize(), Sort.by("createdAt").descending());
-
-        return postRepository.findAllByTagNameAndIsDeletedFalse(postListTagRequest.getTagName(), pageable)
-                .map(PostResponse::new);
-    }
-
     public void delete(UUID id) {
         Member member = memberService.getCurrentMember();
 
