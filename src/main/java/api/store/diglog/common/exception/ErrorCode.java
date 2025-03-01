@@ -1,10 +1,11 @@
 package api.store.diglog.common.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import static org.springframework.http.HttpStatus.*;
+
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
@@ -23,16 +24,24 @@ public enum ErrorCode {
     MEMBER_USERNAME_NOT_FOUND(BAD_REQUEST, "해당 이름을 가진 회원이 없습니다."),
     MEMBER_ID_NOT_FOUND(BAD_REQUEST, "해당 ID를 가진 회원이 없습니다."),
 
-    // S3
-    S3_WRONG_FILE(BAD_REQUEST, "이미지 Byte를 얻는데 실패했습니다. 이미지를 다시 확인해주세요."),
-    S3_IMAGE_UPLOAD_FAILED(INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
-    S3_IMAGE_DELETE_FAILED(INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다."),
+	// S3
+	S3_WRONG_FILE(BAD_REQUEST, "이미지 Byte를 얻는데 실패했습니다. 이미지를 다시 확인해주세요."),
+	S3_IMAGE_UPLOAD_FAILED(INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+	S3_IMAGE_DELETE_FAILED(INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다."),
 
-    // Post
-    POST_NOT_FOUND(BAD_REQUEST, "해당 게시글이 없습니다."),
-    POST_INVALID_SORT(BAD_REQUEST, "정렬 조건이 올바르지 않습니다. (정렬 옵션 : createdAt, updatedAt)"),
-    POST_DELETE_FAILED(FORBIDDEN, "게시글 삭제가 완료되지 않았습니다."),
-    POST_NO_PERMISSION(FORBIDDEN, "게시글 수정 권한이 없습니다."),
+	// Post
+	POST_NOT_FOUND(BAD_REQUEST, "해당 게시글이 없습니다."),
+	POST_INVALID_SORT(BAD_REQUEST, "정렬 조건이 올바르지 않습니다. (정렬 옵션 : createdAt, updatedAt)"),
+	POST_DELETE_FAILED(FORBIDDEN, "게시글 삭제가 완료되지 않았습니다."),
+	POST_NO_PERMISSION(FORBIDDEN, "게시글 수정 권한이 없습니다."),
+
+	// Folder
+	FOLDER_OVER_FLOW_DEPTH(BAD_REQUEST, "하위 폴더의 깊이는 %d까지 허용됩니다."),
+	FOLDER_OVER_FLOW_ORDER_INDEX(BAD_REQUEST, "최대 폴더 순서(%d번)를 초과했습니다."),
+	FOLDER_DUPLICATION_TITLE(BAD_REQUEST, "중복된 폴더 이름이 존재합니다."),
+	FOLDER_OVER_FLOW_SIZE(BAD_REQUEST, "최대 폴더의 개수(%d개)를 초과했습니다."),
+	FOLDER_DUPLICATION_ORDER_INDEX(BAD_REQUEST, "중복된 폴더 순서가 존재합니다."),
+	FOLDER_OVER_FLOW_TITLE_LENGTH(BAD_REQUEST, "폴더 제목은 %d자 까지만 허용됩니다."),
 
     // Comment
     COMMENT_PARENT_ID_NOT_FOUND(BAD_REQUEST, "대댓글을 달기 위해 지정한 댓글을 찾을 수 없습니다."),
@@ -40,13 +49,12 @@ public enum ErrorCode {
     COMMENT_IS_DELETED_NO_CHANGE(BAD_REQUEST, "댓글 삭제 권한이 없거나, 삭제가 완료되지 않았습니다."),
     COMMENT_NOT_FOUND(BAD_REQUEST, "해당 댓글을 찾을 수 없습니다."),
     COMMENT_UPDATE_NO_AUTHORITY(BAD_REQUEST, "해당 댓글을 수정할 수 있는 권한이 없습니다."),
-
     ;
 
-    private final HttpStatus status;
-    private final String message;
+	private final HttpStatus status;
+	private final String message;
 
-    public String getErrorCode() {
-        return this.name();
-    }
+	public String getErrorCode() {
+		return this.name();
+	}
 }
