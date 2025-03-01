@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.model.constant.SearchOption;
 import api.store.diglog.model.dto.post.*;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -84,26 +85,49 @@ public class PostService {
         return new PostResponse(post);
     }
 
-    public Page<PostResponse> getPosts(PostListRequest postListRequest) {
-        int page = postListRequest.getPage();
-        int size = postListRequest.getSize();
-        List<Sort.Order> orders = new ArrayList<>(postListRequest.getSorts().stream()
-                .map(Sort.Order::by)
-                .toList());
-        orders.addLast(Sort.Order.by("id"));
-
-        Pageable pageable;
-        if (postListRequest.getIsDescending()) {
-            pageable = PageRequest.of(page, size, Sort.by(orders).descending());
-        } else {
-            pageable = PageRequest.of(page, size, Sort.by(orders).ascending());
-        }
+    public Page<PostResponse> getPosts(PostListSearchRequest postListSearchRequest) {
+        Pageable pageable = getPageable(postListSearchRequest);
 
         try {
             return postRepository.findAllByIsDeletedFalse(pageable).map(PostResponse::new);
         } catch (Exception e) {
             throw new CustomException(POST_INVALID_SORT);
         }
+    }
+
+    public Page<PostResponse> searchPosts(PostListSearchRequest postListSearchRequest) {
+        Pageable pageable = getPageable(postListSearchRequest);
+        SearchOption option = postListSearchRequest.getOption();
+
+        String title = postListSearchRequest.getKeyword();
+        String tagName = postListSearchRequest.getKeyword();
+
+        return switch (option) {
+            case ALL -> postRepository.findAllByTitleOrTagsNameContainingAndIsDeletedFalse(title, tagName, pageable)
+                    .map(PostResponse::new);
+            case TITLE -> postRepository.findAllByTitleContainingAndIsDeletedFalse(title, pageable)
+                    .map(PostResponse::new);
+            case TAG -> postRepository.findAllByTagsNameContainingAndIsDeletedFalse(tagName, pageable)
+                    .map(PostResponse::new);
+        };
+    }
+
+    private Pageable getPageable(PostListSearchRequest postListSearchRequest) {
+        int page = postListSearchRequest.getPage();
+        int size = postListSearchRequest.getSize();
+        List<Sort.Order> orders = new ArrayList<>(postListSearchRequest.getSorts().stream()
+                .map(Sort.Order::by)
+                .toList());
+        orders.addLast(Sort.Order.by("id"));
+
+        Pageable pageable;
+        if (postListSearchRequest.getIsDescending()) {
+            pageable = PageRequest.of(page, size, Sort.by(orders).descending());
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(orders).ascending());
+        }
+
+        return pageable;
     }
 
     public Page<PostResponse> getPostsTag(PostListTagRequest postListTagRequest) {
