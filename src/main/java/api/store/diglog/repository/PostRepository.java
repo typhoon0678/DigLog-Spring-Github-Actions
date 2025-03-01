@@ -18,10 +18,16 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findAllByIsDeletedFalse(Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE LOWER(p.title) LIKE CONCAT('%', :title, '%') AND p.isDeleted = false")
     Page<Post> findAllByTitleContainingAndIsDeletedFalse(String title, Pageable pageable);
 
+    @Query("SELECT p FROM Post p JOIN p.tags t " +
+            "WHERE LOWER(t.name) LIKE CONCAT('%', :tagName, '%') AND p.isDeleted = false")
     Page<Post> findAllByTagsNameContainingAndIsDeletedFalse(String tagName, Pageable pageable);
 
+    @Query("SELECT p FROM Post p JOIN p.tags t " +
+            "WHERE (LOWER(p.title) LIKE CONCAT('%', :title, '%') OR LOWER(t.name) LIKE CONCAT('%', :tagName, '%'))" +
+            "AND p.isDeleted = false")
     Page<Post> findAllByTitleOrTagsNameContainingAndIsDeletedFalse(String title, String tagName, Pageable pageable);
 
     @Query("SELECT p FROM Post p JOIN p.tags t WHERE LOWER(t.name) = LOWER(:tagName) AND p.isDeleted = false")

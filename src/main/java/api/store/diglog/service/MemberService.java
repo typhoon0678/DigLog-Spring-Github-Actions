@@ -109,7 +109,7 @@ public class MemberService {
     }
 
     public Page<MemberProfileInfoResponse> searchProfileByUsername(MemberProfileSearchRequest memberProfileSearchRequest) {
-        String username = memberProfileSearchRequest.getUsername();
+        String username = memberProfileSearchRequest.getUsername().toLowerCase();
         int page = memberProfileSearchRequest.getPage();
         int size = memberProfileSearchRequest.getSize();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt", "id").descending());

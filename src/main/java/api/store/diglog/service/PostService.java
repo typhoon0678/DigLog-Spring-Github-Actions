@@ -99,8 +99,8 @@ public class PostService {
         Pageable pageable = getPageable(postListSearchRequest);
         SearchOption option = postListSearchRequest.getOption();
 
-        String title = postListSearchRequest.getKeyword();
-        String tagName = postListSearchRequest.getKeyword();
+        String title = postListSearchRequest.getKeyword().toLowerCase();
+        String tagName = postListSearchRequest.getKeyword().toLowerCase();
 
         return switch (option) {
             case ALL -> postRepository.findAllByTitleOrTagsNameContainingAndIsDeletedFalse(title, tagName, pageable)
