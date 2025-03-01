@@ -58,7 +58,7 @@ class PostControllerTest {
     private ImageRepository imageRepository;
 
     @BeforeEach
-    void beforeEach() throws InterruptedException {
+    void beforeEach() {
         Member member = memberRepository.save(defaultMember("test@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag1"));
 
