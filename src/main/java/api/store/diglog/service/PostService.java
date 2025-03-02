@@ -132,7 +132,8 @@ public class PostService {
     }
 
     public Page<PostResponse> getMemberPosts(PostListMemberRequest postListMemberRequest) {
-        Pageable pageable = PageRequest.of(postListMemberRequest.getPage(), postListMemberRequest.getSize(), Sort.by("createdAt", "id"));
+        Pageable pageable = PageRequest.of(postListMemberRequest.getPage(), postListMemberRequest.getSize(),
+                Sort.by("createdAt", "id").descending());
         Member member = memberService.findActiveMemberByUsername(postListMemberRequest.getUsername());
 
         return postRepository.findAllByMemberIdAndIsDeletedFalse(member.getId(), pageable)

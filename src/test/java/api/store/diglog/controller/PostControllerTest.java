@@ -312,6 +312,45 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("username = test인 사용자의 게시글을 불러온다.")
+    void getMemberPosts() throws Exception {
+        // given
+        String username = "username=test";
+        String page = "page=0";
+        String size = "size=5";
+        String parameter = "?" + username + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/member" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("content").get(0).get("title").asText()).isEqualTo("테스트 제목");
+        assertThat(data.get("content").get(1).get("title").asText()).isEqualTo("test title2");
+        assertThat(data.get("content").get(2).get("title").asText()).isEqualTo("test title");
+    }
+
+    @Test
+    @DisplayName("일치하는 username이 없는 경우 에러가 발생한다.")
+    void getMemberPosts2() throws Exception {
+        // given
+        String username = "username=test2";
+        String page = "page=0";
+        String size = "size=5";
+        String parameter = "?" + username + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/member" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
     @DisplayName("삭제 요청 시 isDeleted = true로 변경한다.")
     void delete() throws Exception {
         // given
