@@ -45,6 +45,13 @@ public class PostController {
         return ResponseEntity.ok().body(postResponses);
     }
 
+    @GetMapping("/member")
+    public ResponseEntity<Page<PostResponse>> getMemberPosts(@ParameterObject @ModelAttribute PostListMemberRequest postListMemberRequest) {
+        Page<PostResponse> postResponses = postService.getMemberPosts(postListMemberRequest);
+
+        return ResponseEntity.ok().body(postResponses);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<?> getPostsTag(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
         Page<PostResponse> postResponses = postService.searchPosts(postListSearchRequest);
