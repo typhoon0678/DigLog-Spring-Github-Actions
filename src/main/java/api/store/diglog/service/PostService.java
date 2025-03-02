@@ -103,8 +103,9 @@ public class PostService {
         String tagName = postListSearchRequest.getKeyword();
 
         return switch (option) {
-            case ALL -> postRepository.findAllByTitleContainingIgnoreCaseOrTagsNameContainingIgnoreCaseAndIsDeletedFalse(title, tagName, pageable)
-                    .map(PostResponse::new);
+            case ALL ->
+                    postRepository.findAllByTitleContainingIgnoreCaseOrTagsNameContainingIgnoreCaseAndIsDeletedFalse(title, tagName, pageable)
+                            .map(PostResponse::new);
             case TITLE -> postRepository.findAllByTitleContainingIgnoreCaseAndIsDeletedFalse(title, pageable)
                     .map(PostResponse::new);
             case TAG -> postRepository.findAllByTagsNameContainingIgnoreCaseAndIsDeletedFalse(tagName, pageable)
@@ -128,6 +129,14 @@ public class PostService {
         }
 
         return pageable;
+    }
+
+    public Page<PostResponse> getMemberPosts(PostListMemberRequest postListMemberRequest) {
+        Pageable pageable = PageRequest.of(postListMemberRequest.getPage(), postListMemberRequest.getSize(), Sort.by("createdAt", "id"));
+        Member member = memberService.findActiveMemberByUsername(postListMemberRequest.getUsername());
+
+        return postRepository.findAllByMemberIdAndIsDeletedFalse(member.getId(), pageable)
+                .map(PostResponse::new);
     }
 
     public void delete(UUID id) {
