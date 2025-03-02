@@ -7,7 +7,6 @@ import api.store.diglog.model.dto.post.PostUpdateRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
-import api.store.diglog.repository.ImageRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.TagRepository;
@@ -21,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Sql(value = "/sql/post-controller-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class PostControllerTest {
 
     @Autowired
@@ -53,19 +54,9 @@ class PostControllerTest {
     PostRepository postRepository;
     @Autowired
     private TagRepository tagRepository;
-    @Autowired
-    private ImageRepository imageRepository;
-
-    @BeforeEach
-    void beforeEach() {
-        Member member = memberRepository.save(defaultMember("test@example.com"));
-        Tag tag = tagRepository.save(defaultTag("tag1"));
-        postRepository.save(defaultPost(member, tag));
-    }
 
     @AfterEach
     void afterEach() {
-        imageRepository.deleteAll();
         postRepository.deleteAll();
         tagRepository.deleteAll();
         memberRepository.deleteAll();
@@ -100,7 +91,7 @@ class PostControllerTest {
         // given
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
-        Post post = postRepository.save(defaultPost(member, tag));
+        Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
         PostUpdateRequest dto = new PostUpdateRequest();
         dto.setId(post.getId());
         dto.setTitle("update title");
@@ -127,7 +118,7 @@ class PostControllerTest {
         // given
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
-        Post post = postRepository.save(defaultPost(member, tag));
+        Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
         PostUpdateRequest dto = new PostUpdateRequest();
         dto.setId(post.getId());
         dto.setTitle("update title");
@@ -154,7 +145,7 @@ class PostControllerTest {
         // given
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
-        Post post = postRepository.save(defaultPost(member, tag));
+        Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
         String id = post.getId().toString();
 
         // when
@@ -190,7 +181,7 @@ class PostControllerTest {
         String sorts = "sorts=createdAt";
         String page = "page=0";
         String size = "size=5";
-        String isDescending = "isDescending=true";
+        String isDescending = "isDescending=false";
         String parameter = "?" + sorts + "&" + page + "&" + size + "&" + isDescending;
 
         // when
@@ -213,7 +204,7 @@ class PostControllerTest {
         String sorts = "sorts=created_at";
         String page = "page=0";
         String size = "size=5";
-        String isDescending = "isDescending=true";
+        String isDescending = "isDescending=false";
         String parameter = "?" + sorts + "&" + page + "&" + size + "&" + isDescending;
 
         // when
@@ -226,45 +217,98 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("태그로 게시글 검색에 성공한다.")
-    void getPostsTag() throws Exception {
-        String tagName = "tagName=tag1";
+    @DisplayName("제목으로 게시글 검색에 성공한다.")
+    void searchPosts() throws Exception {
+        // given
+        String keyword = "keyword=eS"; // test
+        String option = "option=TITLE";
+        String sorts = "sorts=createdAt";
         String page = "page=0";
         String size = "size=5";
-        String parameter = "?" + tagName + "&" + page + "&" + size;
+        String isDescending = "isDescending=false";
+        String parameter = "?" + sorts + "&" + option + "&" + keyword + "&" + page + "&" + size + "&" + isDescending;
 
         // when
-        MvcResult result = mockMvc.perform(get("/api/post/tag" + parameter)).andReturn();
+        MvcResult result = mockMvc.perform(get("/api/post/search" + parameter)).andReturn();
         MockHttpServletResponse response = result.getResponse();
         JsonNode data = objectMapper.readTree(response.getContentAsString());
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(data.get("content").get(0).get("title").asText()).isEqualTo("test title");
-        assertThat(data.get("content").get(0).get("content").asText()).isEqualTo("test content");
-        assertThat(data.get("content").get(0).get("tags").get(0).get("name").asText()).isEqualTo("tag1");
-        assertThat(data.get("page").get("size").asInt()).isEqualTo(5);
+        assertThat(data.get("content").get(1).get("title").asText()).isEqualTo("test title2");
     }
 
     @Test
-    @DisplayName("태그를 대문자로 검색했을 때 게시글 검색에 성공한다.")
-    void getPostsTag2() throws Exception {
-        String tagName = "tagName=TAG1";
+    @DisplayName("태그 이름으로 게시글 검색에 성공한다.")
+    void searchPosts2() throws Exception {
+        // given
+        String keyword = "keyword=aG"; // tag
+        String option = "option=TAG";
+        String sorts = "sorts=createdAt";
         String page = "page=0";
         String size = "size=5";
-        String parameter = "?" + tagName + "&" + page + "&" + size;
+        String isDescending = "isDescending=false";
+        String parameter = "?" + sorts + "&" + option + "&" + keyword + "&" + page + "&" + size + "&" + isDescending;
 
         // when
-        MvcResult result = mockMvc.perform(get("/api/post/tag" + parameter)).andReturn();
+        MvcResult result = mockMvc.perform(get("/api/post/search" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("content").get(0).get("tags").get(0).get("name").asText()).isEqualTo("tag1");
+        assertThat(data.get("content").get(1).get("tags").get(0).get("name").asText()).isEqualTo("tag1");
+    }
+
+
+    @Test
+    @DisplayName("전체 검색(제목, 태그 이름)으로 게시글 검색에 성공한다.")
+    void searchPosts3() throws Exception {
+        // given
+        String keyword = "keyword=t"; // test title, tag
+        String option = "option=ALL";
+        String sorts = "sorts=createdAt";
+        String page = "page=0";
+        String size = "size=5";
+        String isDescending = "isDescending=false";
+        String parameter = "?" + sorts + "&" + option + "&" + keyword + "&" + page + "&" + size + "&" + isDescending;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/search" + parameter)).andReturn();
         MockHttpServletResponse response = result.getResponse();
         JsonNode data = objectMapper.readTree(response.getContentAsString());
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(data.get("content").get(0).get("title").asText()).isEqualTo("test title");
-        assertThat(data.get("content").get(0).get("content").asText()).isEqualTo("test content");
         assertThat(data.get("content").get(0).get("tags").get(0).get("name").asText()).isEqualTo("tag1");
-        assertThat(data.get("page").get("size").asInt()).isEqualTo(5);
+        assertThat(data.get("content").get(1).get("title").asText()).isEqualTo("test title2");
+        assertThat(data.get("content").get(1).get("tags").size()).isEqualTo(0);
+        assertThat(data.get("content").get(2).get("title").asText()).isEqualTo("테스트 제목");
+        assertThat(data.get("content").get(2).get("tags").get(0).get("name").asText()).isEqualTo("tag1");
+    }
+
+    @Test
+    @DisplayName("검색 조건이 잘못된 경우 에러가 발생한다.")
+    void searchPosts4() throws Exception {
+        // given
+        String keyword = "keyword=test";
+        String option = "option=all";
+        String sorts = "sorts=createdAt";
+        String page = "page=0";
+        String size = "size=5";
+        String isDescending = "isDescending=false";
+        String parameter = "?" + sorts + "&" + option + "&" + keyword + "&" + page + "&" + size + "&" + isDescending;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/search" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 
     @Test
@@ -273,7 +317,7 @@ class PostControllerTest {
         // given
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
-        Post post = postRepository.save(defaultPost(member, tag));
+        Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
         PostUpdateRequest dto = new PostUpdateRequest();
 
         // when
@@ -295,7 +339,7 @@ class PostControllerTest {
         // given
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
-        Post post = postRepository.save(defaultPost(member, tag));
+        Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
         PostUpdateRequest dto = new PostUpdateRequest();
 
         // when
@@ -325,12 +369,12 @@ class PostControllerTest {
         return "Bearer " + jwtUtil.generateAccessToken(defaultMember(email));
     }
 
-    private Post defaultPost(Member member, Tag tag) {
+    private Post defaultPost(String title, Member member, List<Tag> tags) {
         return Post.builder()
                 .member(member)
-                .title("test title")
+                .title(title)
                 .content("test content")
-                .tags(List.of(tag))
+                .tags(tags)
                 .build();
     }
 

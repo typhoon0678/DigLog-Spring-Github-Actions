@@ -18,8 +18,11 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findAllByIsDeletedFalse(Pageable pageable);
 
-    @Query("SELECT p FROM Post p JOIN p.tags t WHERE LOWER(t.name) = LOWER(:tagName) AND p.isDeleted = false")
-    Page<Post> findAllByTagNameAndIsDeletedFalse(String tagName, Pageable pageable);
+    Page<Post> findAllByTitleContainingIgnoreCaseAndIsDeletedFalse(String title, Pageable pageable);
+
+    Page<Post> findAllByTagsNameContainingIgnoreCaseAndIsDeletedFalse(String tagName, Pageable pageable);
+
+    Page<Post> findAllByTitleContainingIgnoreCaseOrTagsNameContainingIgnoreCaseAndIsDeletedFalse(String title, String tagName, Pageable pageable);
 
     @Modifying
     @Transactional

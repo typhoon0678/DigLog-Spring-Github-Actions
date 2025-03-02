@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import api.store.diglog.common.exception.CustomException;
+import api.store.diglog.model.constant.SearchOption;
 import api.store.diglog.model.dto.post.*;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
@@ -84,20 +85,8 @@ public class PostService {
         return new PostResponse(post);
     }
 
-    public Page<PostResponse> getPosts(PostListRequest postListRequest) {
-        int page = postListRequest.getPage();
-        int size = postListRequest.getSize();
-        List<Sort.Order> orders = new ArrayList<>(postListRequest.getSorts().stream()
-                .map(Sort.Order::by)
-                .toList());
-        orders.addLast(Sort.Order.by("id"));
-
-        Pageable pageable;
-        if (postListRequest.getIsDescending()) {
-            pageable = PageRequest.of(page, size, Sort.by(orders).descending());
-        } else {
-            pageable = PageRequest.of(page, size, Sort.by(orders).ascending());
-        }
+    public Page<PostResponse> getPosts(PostListSearchRequest postListSearchRequest) {
+        Pageable pageable = getPageable(postListSearchRequest);
 
         try {
             return postRepository.findAllByIsDeletedFalse(pageable).map(PostResponse::new);
@@ -106,11 +95,39 @@ public class PostService {
         }
     }
 
-    public Page<PostResponse> getPostsTag(PostListTagRequest postListTagRequest) {
-        Pageable pageable = PageRequest.of(postListTagRequest.getPage(), postListTagRequest.getSize(), Sort.by("createdAt").descending());
+    public Page<PostResponse> searchPosts(PostListSearchRequest postListSearchRequest) {
+        Pageable pageable = getPageable(postListSearchRequest);
+        SearchOption option = postListSearchRequest.getOption();
 
-        return postRepository.findAllByTagNameAndIsDeletedFalse(postListTagRequest.getTagName(), pageable)
-                .map(PostResponse::new);
+        String title = postListSearchRequest.getKeyword();
+        String tagName = postListSearchRequest.getKeyword();
+
+        return switch (option) {
+            case ALL -> postRepository.findAllByTitleContainingIgnoreCaseOrTagsNameContainingIgnoreCaseAndIsDeletedFalse(title, tagName, pageable)
+                    .map(PostResponse::new);
+            case TITLE -> postRepository.findAllByTitleContainingIgnoreCaseAndIsDeletedFalse(title, pageable)
+                    .map(PostResponse::new);
+            case TAG -> postRepository.findAllByTagsNameContainingIgnoreCaseAndIsDeletedFalse(tagName, pageable)
+                    .map(PostResponse::new);
+        };
+    }
+
+    private Pageable getPageable(PostListSearchRequest postListSearchRequest) {
+        int page = postListSearchRequest.getPage();
+        int size = postListSearchRequest.getSize();
+        List<Sort.Order> orders = new ArrayList<>(postListSearchRequest.getSorts().stream()
+                .map(Sort.Order::by)
+                .toList());
+        orders.addLast(Sort.Order.by("id"));
+
+        Pageable pageable;
+        if (postListSearchRequest.getIsDescending()) {
+            pageable = PageRequest.of(page, size, Sort.by(orders).descending());
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(orders).ascending());
+        }
+
+        return pageable;
     }
 
     public void delete(UUID id) {

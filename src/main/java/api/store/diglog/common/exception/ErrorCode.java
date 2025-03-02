@@ -34,6 +34,7 @@ public enum ErrorCode {
 	POST_INVALID_SORT(BAD_REQUEST, "정렬 조건이 올바르지 않습니다. (정렬 옵션 : createdAt, updatedAt)"),
 	POST_DELETE_FAILED(FORBIDDEN, "게시글 삭제가 완료되지 않았습니다."),
 	POST_NO_PERMISSION(FORBIDDEN, "게시글 수정 권한이 없습니다."),
+	POST_INVALID_SEARCH_OPTION(BAD_REQUEST, "올바르지 않은 검색 옵션입니다."),
 
 	// Folder
 	FOLDER_OVER_FLOW_DEPTH(BAD_REQUEST, "하위 폴더의 깊이는 %d까지 허용됩니다."),
