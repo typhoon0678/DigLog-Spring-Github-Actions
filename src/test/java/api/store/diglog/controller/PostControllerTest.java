@@ -7,7 +7,6 @@ import api.store.diglog.model.dto.post.PostUpdateRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
-import api.store.diglog.repository.ImageRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.TagRepository;
@@ -21,10 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -37,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Sql(value = "/sql/post-controller-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class PostControllerTest {
 
     @Autowired
@@ -54,22 +54,9 @@ class PostControllerTest {
     PostRepository postRepository;
     @Autowired
     private TagRepository tagRepository;
-    @Autowired
-    private ImageRepository imageRepository;
-
-    @BeforeEach
-    void beforeEach() {
-        Member member = memberRepository.save(defaultMember("test@example.com"));
-        Tag tag = tagRepository.save(defaultTag("tag1"));
-
-        postRepository.saveAndFlush(defaultPost("test title", member, List.of(tag)));
-        postRepository.saveAndFlush(defaultPost("test title2", member, List.of()));
-        postRepository.saveAndFlush(defaultPost("테스트 제목", member, List.of(tag)));
-    }
 
     @AfterEach
     void afterEach() {
-        imageRepository.deleteAll();
         postRepository.deleteAll();
         tagRepository.deleteAll();
         memberRepository.deleteAll();
@@ -382,18 +369,13 @@ class PostControllerTest {
         return "Bearer " + jwtUtil.generateAccessToken(defaultMember(email));
     }
 
-    private Post defaultPost(String title, Member member, List<Tag> tags, LocalDateTime createdAt) {
+    private Post defaultPost(String title, Member member, List<Tag> tags) {
         return Post.builder()
                 .member(member)
                 .title(title)
                 .content("test content")
                 .tags(tags)
-                .createdAt(createdAt)
                 .build();
-    }
-
-    private Post defaultPost(String title, Member member, List<Tag> tags) {
-        return defaultPost(title, member, tags, LocalDateTime.now());
     }
 
     private Tag defaultTag(String name) {
