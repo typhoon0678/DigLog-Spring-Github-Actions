@@ -13,7 +13,6 @@ import api.store.diglog.model.dto.member.MemberUsernameRequest;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.vo.image.ImageSaveVO;
 import api.store.diglog.repository.MemberRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -28,6 +28,7 @@ import static api.store.diglog.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -52,6 +53,7 @@ public class MemberService {
         return member;
     }
 
+    @Transactional
     public void updateUsername(MemberUsernameRequest memberUsernameRequest) {
         String email = SecurityUtil.getAuthenticationMemberInfo().getEmail();
         memberRepository.updateUsername(memberUsernameRequest.getUsername(), email);

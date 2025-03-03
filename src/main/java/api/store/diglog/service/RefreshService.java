@@ -15,11 +15,12 @@ import api.store.diglog.model.entity.Refresh;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.RefreshRepository;
 import jakarta.servlet.http.Cookie;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RefreshService {
 
     private final RefreshRepository refreshRepository;
