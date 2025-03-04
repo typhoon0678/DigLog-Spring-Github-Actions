@@ -122,10 +122,11 @@ class EmailVerificationControllerTest {
         // given
         emailVerificationRepository.updateVerifiedTrue("test@example.com");
 
-        EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
-        dto.setEmail("test@example.com");
-        dto.setPassword("qwer1234");
-        dto.setCode("123456");
+        EmailVerificationSignupRequest dto = EmailVerificationSignupRequest.builder()
+                .email("test@example.com")
+                .password("qwer1234")
+                .code("123456")
+                .build();
 
         // when
         // then
@@ -139,10 +140,11 @@ class EmailVerificationControllerTest {
         // given
         emailVerificationRepository.updateVerifiedTrue("test@example.com");
 
-        EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
-        dto.setEmail("test@example.com");
-        dto.setPassword("qwer1234");
-        dto.setCode("567890");
+        EmailVerificationSignupRequest dto = EmailVerificationSignupRequest.builder()
+                .email("test@example.com")
+                .password("qwer1234")
+                .code("567890")
+                .build();
 
         // when
         // then

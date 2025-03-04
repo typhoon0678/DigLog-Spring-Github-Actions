@@ -1,9 +1,11 @@
 package api.store.diglog.model.dto.member;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
 public class MemberUsernameRequest {
 
-    private String username;
+    private final String username;
 }

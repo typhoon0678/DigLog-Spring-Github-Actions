@@ -1,16 +1,16 @@
 package api.store.diglog.model.dto.member;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.Set;
 
-@Data
+@Getter
 @Builder
 public class MemberInfoResponse {
 
-    private int status;
-    private String email;
-    private String username;
-    private Set<String> roles;
+    private final int status;
+    private final String email;
+    private final String username;
+    private final Set<String> roles;
 }

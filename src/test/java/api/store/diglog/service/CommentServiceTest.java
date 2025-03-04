@@ -61,9 +61,10 @@ class CommentServiceTest {
         @DisplayName("댓글 생성에 성공한다.")
         void success(UUID parentCommentId, int depth) {
             // given
-            CommentRequest dto = new CommentRequest();
-            dto.setPostId(POST_ID);
-            dto.setContent(CONTENT);
+            CommentRequest dto = CommentRequest.builder()
+                    .postId(POST_ID)
+                    .content(CONTENT)
+                    .build();
 
             Comment parentComment = Comment.builder()
                     .id(parentCommentId)
@@ -98,10 +99,11 @@ class CommentServiceTest {
         @DisplayName("댓글 생성에 문제가 있는 경우 에러를 띄운다.")
         void fail(UUID parentCommentId) {
             // given
-            CommentRequest dto = new CommentRequest();
-            dto.setPostId(POST_ID);
-            dto.setContent(CONTENT);
-            dto.setParentCommentId(parentCommentId);
+            CommentRequest dto = CommentRequest.builder()
+                    .postId(POST_ID)
+                    .content(CONTENT)
+                    .parentCommentId(parentCommentId)
+                    .build();
 
             Comment parentComment = Comment.builder()
                     .id(parentCommentId)
@@ -148,11 +150,12 @@ class CommentServiceTest {
         @DisplayName("댓글 조회에 성공한다.")
         void success(UUID parentCommentId, Page<Comment> selectResult) {
             // given
-            CommentListRequest dto = new CommentListRequest();
-            dto.setPostId(POST_ID);
-            dto.setPage(PAGE);
-            dto.setSize(SIZE);
-            dto.setParentCommentId(parentCommentId);
+            CommentListRequest dto = CommentListRequest.builder()
+                    .postId(POST_ID)
+                    .page(PAGE)
+                    .size(SIZE)
+                    .parentCommentId(parentCommentId)
+                    .build();
 
             when(memberService.findMemberById(any(UUID.class))).thenReturn(getMember(EMAIL, USERNAME));
             lenient().when(commentRepository.findByPostIdAndParentCommentIdAndIsDeletedFalse(POST_ID, parentCommentId, PAGEABLE)).thenReturn(selectResult);
@@ -218,10 +221,11 @@ class CommentServiceTest {
         @DisplayName("댓글 수정에 성공한다.")
         void success(String taggedUsername) {
             // given
-            CommentUpdateRequest dto = new CommentUpdateRequest();
-            dto.setId(COMMENT_ID);
-            dto.setContent(CONTENT);
-            dto.setTaggedUsername(taggedUsername);
+            CommentUpdateRequest dto = CommentUpdateRequest.builder()
+                    .id(COMMENT_ID)
+                    .content(CONTENT)
+                    .taggedUsername(taggedUsername)
+                    .build();
 
             Member member = Member.builder()
                     .id(MEMBER_ID)
@@ -255,10 +259,11 @@ class CommentServiceTest {
         @DisplayName("댓글 수정에 실패한다.")
         void fail(UUID commentId, UUID memberId) {
             // given
-            CommentUpdateRequest dto = new CommentUpdateRequest();
-            dto.setId(commentId);
-            dto.setContent(CONTENT);
-            dto.setTaggedUsername(TAGGED_USERNAME);
+            CommentUpdateRequest dto = CommentUpdateRequest.builder()
+                    .id(commentId)
+                    .content(CONTENT)
+                    .taggedUsername(TAGGED_USERNAME)
+                    .build();
 
             Member member = Member.builder()
                     .id(memberId)

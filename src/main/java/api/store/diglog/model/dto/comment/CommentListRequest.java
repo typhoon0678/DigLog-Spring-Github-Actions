@@ -1,14 +1,16 @@
 package api.store.diglog.model.dto.comment;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Builder
 public class CommentListRequest {
 
-    private UUID postId;
-    private UUID parentCommentId;
-    private int page;
-    private int size;
+    private final UUID postId;
+    private final UUID parentCommentId;
+    private final int page;
+    private final int size;
 }

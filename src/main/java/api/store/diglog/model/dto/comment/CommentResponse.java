@@ -1,12 +1,12 @@
 package api.store.diglog.model.dto.comment;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
 @Builder
 public class CommentResponse {
 

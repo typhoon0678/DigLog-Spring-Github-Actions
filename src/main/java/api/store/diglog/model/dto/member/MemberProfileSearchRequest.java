@@ -1,11 +1,13 @@
 package api.store.diglog.model.dto.member;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
 public class MemberProfileSearchRequest {
 
-    private String username;
-    private int page;
-    private int size;
+    private final String username;
+    private final int page;
+    private final int size;
 }

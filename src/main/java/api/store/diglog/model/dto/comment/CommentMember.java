@@ -1,12 +1,12 @@
 package api.store.diglog.model.dto.comment;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class CommentMember {
 
-    private String username;
-    private String profileUrl;
+    private final String username;
+    private final String profileUrl;
 }

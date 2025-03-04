@@ -1,17 +1,19 @@
 package api.store.diglog.model.dto.post;
 
 import api.store.diglog.model.constant.SearchOption;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Builder
 public class PostListSearchRequest {
 
-    private String keyword;
-    private SearchOption option;
-    private List<String> sorts;
-    private int page;
-    private int size;
-    private Boolean isDescending;
+    private final String keyword;
+    private final SearchOption option;
+    private final List<String> sorts;
+    private final int page;
+    private final int size;
+    private final Boolean isDescending;
 }

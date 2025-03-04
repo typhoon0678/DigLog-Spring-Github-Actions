@@ -1,14 +1,16 @@
 package api.store.diglog.model.dto.post;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Builder
 public class PostRequest {
 
-    private String title;
-    private String content;
-    private List<String> tagNames;
-    private List<String> urls;
+    private final String title;
+    private final String content;
+    private final List<String> tagNames;
+    private final List<String> urls;
 }

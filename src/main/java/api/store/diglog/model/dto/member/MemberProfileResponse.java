@@ -1,13 +1,13 @@
 package api.store.diglog.model.dto.member;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class MemberProfileResponse {
 
-    private String email;
-    private String username;
-    private String profileUrl;
+    private final String email;
+    private final String username;
+    private final String profileUrl;
 }

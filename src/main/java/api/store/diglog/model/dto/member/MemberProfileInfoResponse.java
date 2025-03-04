@@ -7,11 +7,6 @@ import lombok.Getter;
 @Builder
 public class MemberProfileInfoResponse {
 
-    private String username;
-    private String profileUrl;
-
-    public MemberProfileInfoResponse(String username, String profileUrl) {
-        this.username = username;
-        this.profileUrl = profileUrl;
-    }
+    private final String username;
+    private final String profileUrl;
 }
