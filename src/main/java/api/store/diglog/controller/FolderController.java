@@ -3,6 +3,8 @@ package api.store.diglog.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,13 @@ import lombok.RequiredArgsConstructor;
 public class FolderController {
 
 	private final FolderService folderService;
+
+	@GetMapping("/{username}")
+	public ResponseEntity<List<FolderResponse>> getFoldersBy(@PathVariable("username") String username) {
+
+		List<FolderResponse> folderResponses = folderService.getFolders(username);
+		return ResponseEntity.ok().body(folderResponses);
+	}
 
 	@PutMapping
 	public ResponseEntity<List<FolderResponse>> createAndUpdate(

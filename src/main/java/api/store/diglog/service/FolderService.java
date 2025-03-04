@@ -2,6 +2,7 @@ package api.store.diglog.service;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,20 @@ public class FolderService {
 
 	private final FolderRepository folderRepository;
 	private final MemberService memberService;
+
+	public List<FolderResponse> getFolders(String username) {
+
+		Member member = memberService.findActiveMemberByUsername(username);
+
+		List<Folder> folders = folderRepository.findAllByMember(member);
+		return folders.stream()
+			.map(folder -> FolderResponse.builder()
+				.folder(folder)
+				.build())
+			.sorted(Comparator.comparing(FolderResponse::getOrderIndex))
+			.toList();
+
+	}
 
 	@Transactional
 	public List<FolderResponse> createAndUpdateFolders(List<FolderCreateRequest> folderCreateRequests) {
