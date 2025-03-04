@@ -48,6 +48,7 @@ public class MemberService {
                 .orElseThrow(() -> new CustomException(MEMBER_EMAIL_NOT_FOUND));
     }
 
+    @Transactional
     public LoginTokenVO login(LoginRequest loginRequest) {
         Member member = memberRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new CustomException(LOGIN_FAILED));
@@ -75,6 +76,7 @@ public class MemberService {
                 .build();
     }
 
+    @Transactional
     public LogoutTokenVO logout(LogoutRequest logoutRequest) {
 
         Cookie logoutCookie = jwtUtil.generateLogoutCookie();
