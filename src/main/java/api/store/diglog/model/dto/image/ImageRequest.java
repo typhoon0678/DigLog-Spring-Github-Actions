@@ -1,10 +1,12 @@
 package api.store.diglog.model.dto.image;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
+@Getter
+@Builder
 public class ImageRequest {
 
-    private MultipartFile file;
+    private final MultipartFile file;
 }

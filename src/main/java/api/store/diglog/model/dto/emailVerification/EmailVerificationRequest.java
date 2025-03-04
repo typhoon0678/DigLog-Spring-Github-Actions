@@ -1,12 +1,12 @@
 package api.store.diglog.model.dto.emailVerification;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class EmailVerificationRequest {
 
-    private String email;
-    private String code;
+    private final String email;
+    private final String code;
 }

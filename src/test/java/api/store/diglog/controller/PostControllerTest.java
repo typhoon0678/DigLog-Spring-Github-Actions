@@ -66,11 +66,12 @@ class PostControllerTest {
     @DisplayName("게시글 저장에 성공한다.")
     void save() throws Exception {
         // given
-        PostRequest dto = new PostRequest();
-        dto.setTitle("title");
-        dto.setContent("content");
-        dto.setUrls(List.of("url1", "url2"));
-        dto.setTagNames(List.of("tag1", "tag2"));
+        PostRequest dto = PostRequest.builder()
+                .title("title")
+                .content("content")
+                .urls(List.of("url1", "url2"))
+                .tagNames(List.of("tag1", "tag2"))
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(post("/api/post")
@@ -92,12 +93,13 @@ class PostControllerTest {
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
         Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
-        PostUpdateRequest dto = new PostUpdateRequest();
-        dto.setId(post.getId());
-        dto.setTitle("update title");
-        dto.setContent("update content");
-        dto.setUrls(List.of("url2", "url3"));
-        dto.setTagNames(List.of("tag2", "tag3"));
+        PostUpdateRequest dto = PostUpdateRequest.builder()
+                .id(post.getId())
+                .title("update title")
+                .content("update content")
+                .urls(List.of("url2", "url3"))
+                .tagNames(List.of("tag1", "tag2"))
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(patch("/api/post")
@@ -119,12 +121,13 @@ class PostControllerTest {
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
         Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
-        PostUpdateRequest dto = new PostUpdateRequest();
-        dto.setId(post.getId());
-        dto.setTitle("update title");
-        dto.setContent("update content");
-        dto.setUrls(List.of("url2", "url3"));
-        dto.setTagNames(List.of("tag2", "tag3"));
+        PostUpdateRequest dto = PostUpdateRequest.builder()
+                .id(post.getId())
+                .title("update title")
+                .content("update content")
+                .urls(List.of("url2", "url3"))
+                .tagNames(List.of("tag2", "tag3"))
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(patch("/api/post")
@@ -357,7 +360,7 @@ class PostControllerTest {
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
         Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
-        PostUpdateRequest dto = new PostUpdateRequest();
+        PostUpdateRequest dto = PostUpdateRequest.builder().build();
 
         // when
         MvcResult result = mockMvc.perform(patch("/api/post/delete/" + post.getId().toString())
@@ -379,7 +382,7 @@ class PostControllerTest {
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
         Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
-        PostUpdateRequest dto = new PostUpdateRequest();
+        PostUpdateRequest dto = PostUpdateRequest.builder().build();
 
         // when
         MvcResult result = mockMvc.perform(patch("/api/post/delete/" + post.getId().toString())

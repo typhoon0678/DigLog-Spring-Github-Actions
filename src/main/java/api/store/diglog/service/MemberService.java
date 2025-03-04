@@ -151,7 +151,10 @@ public class MemberService {
         return memberRepository.findAllByUsernameContainingIgnoreCaseAndIsDeletedFalse(username, pageable)
                 .map(member -> {
                     String profileUrl = imageService.getUrlByRefId(member.getId()).getUrl();
-                    return new MemberProfileInfoResponse(member.getUsername(), profileUrl);
+                    return MemberProfileInfoResponse.builder()
+                            .username(member.getUsername())
+                            .profileUrl(profileUrl)
+                            .build();
                 });
     }
 }

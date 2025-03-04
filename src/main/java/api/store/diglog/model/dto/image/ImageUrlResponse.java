@@ -1,9 +1,9 @@
 package api.store.diglog.model.dto.image;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class ImageUrlResponse {
 

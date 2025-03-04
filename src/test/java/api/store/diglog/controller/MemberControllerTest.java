@@ -58,8 +58,9 @@ class MemberControllerTest {
     @DisplayName("username 변경 요청을 성공한다.")
     void updateUsername() throws Exception {
         // given
-        MemberUsernameRequest dto = new MemberUsernameRequest();
-        dto.setUsername("newUsername");
+        MemberUsernameRequest dto = MemberUsernameRequest.builder()
+                .username("newUsername")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(post("/api/member/username")

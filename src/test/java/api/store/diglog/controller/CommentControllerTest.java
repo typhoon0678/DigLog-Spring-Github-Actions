@@ -80,9 +80,10 @@ class CommentControllerTest {
     @DisplayName("댓글 작성에 성공한다.")
     void save() throws Exception {
         // given
-        CommentRequest dto = new CommentRequest();
-        dto.setPostId(postRepository.findAll().get(0).getId());
-        dto.setContent("test content");
+        CommentRequest dto = CommentRequest.builder()
+                .postId(postRepository.findAll().get(0).getId())
+                .content("test content")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(post("/api/comment")
@@ -102,10 +103,11 @@ class CommentControllerTest {
     @DisplayName("멤버를 태그한 댓글 작성에 성공한다.")
     void saveWithTaggedMember() throws Exception {
         // given
-        CommentRequest dto = new CommentRequest();
-        dto.setPostId(postRepository.findAll().get(0).getId());
-        dto.setContent("test content");
-        dto.setTaggedUsername("test2");
+        CommentRequest dto = CommentRequest.builder()
+                .postId(postRepository.findAll().get(0).getId())
+                .content("test content")
+                .taggedUsername("test2")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(post("/api/comment")
@@ -125,9 +127,10 @@ class CommentControllerTest {
     @DisplayName("로그인되어 있지 않은 경우 댓글 작성에 실패한다.")
     void save2() throws Exception {
         // given
-        CommentRequest dto = new CommentRequest();
-        dto.setPostId(postRepository.findAll().get(0).getId());
-        dto.setContent("test content");
+        CommentRequest dto = CommentRequest.builder()
+                .postId(postRepository.findAll().get(0).getId())
+                .content("test content")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(post("/api/comment")
@@ -145,10 +148,11 @@ class CommentControllerTest {
     @DisplayName("최대 depth를 초과하는 경우 댓글 작성에 실패한다.")
     void save3() throws Exception {
         // given
-        CommentRequest dto = new CommentRequest();
-        dto.setPostId(postRepository.findAll().get(0).getId());
-        dto.setParentCommentId(postRepository.findAll().getLast().getId());
-        dto.setContent("test content");
+        CommentRequest dto = CommentRequest.builder()
+                .postId(postRepository.findAll().get(0).getId())
+                .parentCommentId(postRepository.findAll().getLast().getId())
+                .content("test content")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(post("/api/comment")
@@ -257,10 +261,10 @@ class CommentControllerTest {
         // given
         UUID commentId = commentRepository.findAll().get(0).getId();
 
-        CommentUpdateRequest dto = new CommentUpdateRequest();
-        dto.setId(commentId);
-        dto.setContent("update comment");
-        dto.setTaggedUsername(null);
+        CommentUpdateRequest dto = CommentUpdateRequest.builder()
+                .id(commentId)
+                .content("update comment")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(patch("/api/comment")
@@ -283,10 +287,10 @@ class CommentControllerTest {
         // given
         UUID commentId = commentRepository.findAll().get(0).getId();
 
-        CommentUpdateRequest dto = new CommentUpdateRequest();
-        dto.setId(commentId);
-        dto.setContent("update comment");
-        dto.setTaggedUsername(null);
+        CommentUpdateRequest dto = CommentUpdateRequest.builder()
+                .id(commentId)
+                .content("update comment")
+                .build();
 
         // when
         MvcResult result = mockMvc.perform(patch("/api/comment")

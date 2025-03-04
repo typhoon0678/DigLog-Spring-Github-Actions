@@ -63,9 +63,10 @@ class LoginControllerTest {
     @DisplayName("로그인 성공 시 accessToken, refreshToken, 멤버 정보를 return 한다.")
     void login() throws Exception {
         // given
-        LoginRequest dto = new LoginRequest();
-        dto.setEmail("test@example.com");
-        dto.setPassword("qwer1234");
+        LoginRequest dto = LoginRequest.builder()
+                .email("test@example.com")
+                .password("qwer1234")
+                .build();
 
         // when
         MvcResult result = setMockMvc("post", "/api/member/login", dto);
@@ -85,9 +86,10 @@ class LoginControllerTest {
     @DisplayName("이메일이 일치하지 않는 경우 에러를 반환한다.")
     void login2() throws Exception {
         // given
-        LoginRequest dto = new LoginRequest();
-        dto.setEmail("test2222@example.com");
-        dto.setPassword("qwer1234");
+        LoginRequest dto = LoginRequest.builder()
+                .email("test2222@example.com")
+                .password("qwer1234")
+                .build();
 
         // when
         MvcResult result = setMockMvc("post", "/api/member/login", dto);
@@ -102,9 +104,10 @@ class LoginControllerTest {
     @DisplayName("비밀번호가 일치하지 않는 경우 에러를 반환한다.")
     void login3() throws Exception {
         // given
-        LoginRequest dto = new LoginRequest();
-        dto.setEmail("test@example.com");
-        dto.setPassword("qwer5678");
+        LoginRequest dto = LoginRequest.builder()
+                .email("test@example.com")
+                .password("qwer5678")
+                .build();
 
         // when
         MvcResult result = setMockMvc("post", "/api/member/login", dto);
@@ -119,8 +122,9 @@ class LoginControllerTest {
     @DisplayName("로그아웃 시 유효기간이 0인 refreshToken을 return 한다.")
     void logout() throws Exception {
         // given
-        LogoutRequest dto = new LogoutRequest();
-        dto.setEmail("test@example.com");
+        LogoutRequest dto = LogoutRequest.builder()
+                .email("test@example.com")
+                .build();
 
         // when
         MvcResult result = setMockMvc("post", "/api/member/logout", dto);

@@ -2,20 +2,22 @@ package api.store.diglog.model.dto.post;
 
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Builder
 public class PostUpdateRequest {
 
-    private UUID id;
-    private String title;
-    private String content;
-    private List<String> tagNames;
-    private List<String> urls;
+    private final UUID id;
+    private final String title;
+    private final String content;
+    private final List<String> tagNames;
+    private final List<String> urls;
 
     public Post toPost(Post currentPost, List<Tag> tags) {
         return Post.builder()

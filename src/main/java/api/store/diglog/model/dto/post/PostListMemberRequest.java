@@ -1,14 +1,16 @@
 package api.store.diglog.model.dto.post;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Builder
 public class PostListMemberRequest {
 
-    private String username;
-    private UUID folderId;
-    int page;
-    int size;
+    private final String username;
+    private final UUID folderId;
+    private final int page;
+    private final int size;
 }

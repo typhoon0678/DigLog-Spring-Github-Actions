@@ -125,10 +125,11 @@ class EmailVerificationServiceTest {
             // given
             LocalDateTime createdAt = LocalDateTime.now().minusMinutes(19);
 
-            EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
-            dto.setEmail(EMAIL);
-            dto.setPassword(PASSWORD);
-            dto.setCode(CODE);
+            EmailVerificationSignupRequest dto = EmailVerificationSignupRequest.builder()
+                    .email(EMAIL)
+                    .password(PASSWORD)
+                    .code(CODE)
+                    .build();
 
             EmailVerification emailVerification = getEmailVerification(EMAIL, CODE, true, createdAt);
 
@@ -159,10 +160,11 @@ class EmailVerificationServiceTest {
             // given
             EmailVerification emailVerification = getEmailVerification(EMAIL, CODE, isVerified, createdAt);
 
-            EmailVerificationSignupRequest dto = new EmailVerificationSignupRequest();
-            dto.setEmail(testEmail);
-            dto.setPassword(PASSWORD);
-            dto.setCode(testCode);
+            EmailVerificationSignupRequest dto = EmailVerificationSignupRequest.builder()
+                    .email(testEmail)
+                    .password(PASSWORD)
+                    .code(testCode)
+                    .build();
 
             lenient().when(emailVerificationRepository.findByEmail(EMAIL)).thenReturn(Optional.of(emailVerification));
             lenient().when(emailVerificationRepository.findByEmail(INVALID_EMAIL)).thenReturn(Optional.empty());
