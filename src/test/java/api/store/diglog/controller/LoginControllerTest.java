@@ -60,7 +60,7 @@ class LoginControllerTest {
     }
 
     @Test
-    @DisplayName("로그인 성공 시 accessToken, refreshToken, 멤버 정보를 return 한다.")
+    @DisplayName("로그인 성공 시 refreshToken을 저장하고, accessToken, refreshToken, 멤버 정보를 return 한다.")
     void login() throws Exception {
         // given
         LoginRequest dto = new LoginRequest();
@@ -73,6 +73,8 @@ class LoginControllerTest {
         JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString());
 
         // then
+        assertThat(refreshRepository.countByRefreshToken(response.getCookie("refreshToken").getValue())).isEqualTo(1);
+
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getHeader("Authorization")).startsWith("Bearer ");
         assertThat(response.getCookie("refreshToken").getValue()).isNotNull();
