@@ -1,12 +1,13 @@
 package api.store.diglog.model.dto.emailVerification;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerificationRequest {
 
-    private final String email;
-    private final String code;
+    private String email;
+    private String code;
 }

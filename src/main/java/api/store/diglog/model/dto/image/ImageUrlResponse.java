@@ -1,11 +1,12 @@
 package api.store.diglog.model.dto.image;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ImageUrlResponse {
 
-    private final String url;
+    private String url;
 }

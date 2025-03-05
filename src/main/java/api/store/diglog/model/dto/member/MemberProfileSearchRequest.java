@@ -1,13 +1,15 @@
 package api.store.diglog.model.dto.member;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
+@Setter
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberProfileSearchRequest {
 
-    private final String username;
-    private final int page;
-    private final int size;
+    private String username;
+    private int page;
+    private int size;
 }
