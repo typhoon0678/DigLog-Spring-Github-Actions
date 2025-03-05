@@ -3,6 +3,7 @@ package api.store.diglog.service;
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.SearchOption;
 import api.store.diglog.model.dto.post.*;
+import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
@@ -32,15 +33,19 @@ public class PostService {
     private final MemberService memberService;
     private final ImageService imageService;
     private final TagService tagService;
+    private final FolderService folderService;
 
     @Transactional
     public void save(PostRequest postRequest) {
+        Member member = memberService.getCurrentMember();
         List<Tag> tags = saveNewTags(postRequest.getTagNames());
+        Folder folder = folderService.getFolderByIdAndMemberId(postRequest.getFolderId(), member.getId());
 
         Post post = Post.builder()
-                .member(memberService.getCurrentMember())
+                .member(member)
                 .title(postRequest.getTitle())
                 .content(postRequest.getContent())
+                .folder(folder)
                 .tags(tags)
                 .build();
         Post savedPost = postRepository.save(post);
@@ -54,19 +59,23 @@ public class PostService {
 
     @Transactional
     public void update(PostUpdateRequest postUpdateRequest) {
+        Member member = memberService.getCurrentMember();
+
         List<Tag> tags = saveNewTags(postUpdateRequest.getTagNames());
 
         Post post = postRepository.findById(postUpdateRequest.getId())
                 .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
-        if (!post.getMember().equals(memberService.getCurrentMember())) {
+        if (!post.getMember().equals(member)) {
             throw new CustomException(POST_NO_PERMISSION);
         }
 
-        Post updatedPost = postUpdateRequest.toPost(post, tags);
-        Post savedPost = postRepository.save(updatedPost);
+        Folder folder = folderService.getFolderByIdAndMemberId(postUpdateRequest.getFolderId(), member.getId());
+
+        Post updatePost = postUpdateRequest.toPost(post, folder, tags);
+        postRepository.save(updatePost);
 
         ImagePostVO imagePostVO = ImagePostVO.builder()
-                .id(savedPost.getId())
+                .id(post.getId())
                 .urls(postUpdateRequest.getUrls())
                 .build();
         imageService.saveUpdatedPostImage(imagePostVO);

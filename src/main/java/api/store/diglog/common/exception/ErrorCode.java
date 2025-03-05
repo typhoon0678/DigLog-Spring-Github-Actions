@@ -43,6 +43,7 @@ public enum ErrorCode {
 	FOLDER_OVER_FLOW_SIZE(BAD_REQUEST, "최대 폴더의 개수(%d개)를 초과했습니다."),
 	FOLDER_DUPLICATION_ORDER_INDEX(BAD_REQUEST, "중복된 폴더 순서가 존재합니다."),
 	FOLDER_OVER_FLOW_TITLE_LENGTH(BAD_REQUEST, "폴더 제목은 %d자 까지만 허용됩니다."),
+	FOLDER_OWNER_MISMATCH(BAD_REQUEST, "멤버가 갖고 있는 폴더 중 해당 폴더를 찾을 수 없습니다."),
 
     // Comment
     COMMENT_PARENT_ID_NOT_FOUND(BAD_REQUEST, "대댓글을 달기 위해 지정한 댓글을 찾을 수 없습니다."),
