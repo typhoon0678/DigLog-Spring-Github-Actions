@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.entity.Post;
+import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,6 +32,12 @@ class FolderRepositoryTest {
 
 	@Autowired
 	FolderRepository folderRepository;
+
+	@Autowired
+	PostRepository postRepository;
+
+	@Autowired
+	EntityManager entityManager;
 
 	@DisplayName("회원 이름으로 폴더를 조회할 수 있다")
 	@Test
@@ -47,8 +55,9 @@ class FolderRepositoryTest {
 			.build();
 
 		memberRepository.save(member);
+		entityManager.flush();
 
-		Folder test01 = Folder.builder()
+		Folder folder01 = Folder.builder()
 			.id(UUID.randomUUID())
 			.member(member)
 			.title("test01")
@@ -56,31 +65,61 @@ class FolderRepositoryTest {
 			.orderIndex(0)
 			.parentFolder(null)
 			.build();
-		Folder test02 = Folder.builder()
+		Folder folder02 = Folder.builder()
 			.id(UUID.randomUUID())
 			.member(member)
 			.title("test02")
 			.depth(1)
 			.orderIndex(1)
-			.parentFolder(test01)
+			.parentFolder(folder01)
 			.build();
-		Folder test03 = Folder.builder()
+		Folder folder03 = Folder.builder()
 			.id(UUID.randomUUID())
 			.member(member)
 			.title("test03")
 			.depth(2)
 			.orderIndex(2)
-			.parentFolder(test02)
+			.parentFolder(folder02)
 			.build();
 
-		folderRepository.saveAll(List.of(test01, test02, test03));
+		folderRepository.saveAll(List.of(folder01, folder02, folder03));
+		entityManager.flush();
+
+		List<Post> posts = List.of(
+			Post.builder()
+				.member(member)
+				.folder(folder01)
+				.title("title01")
+				.content("content01")
+				.build(),
+			Post.builder()
+				.member(member)
+				.folder(folder01)
+				.title("title02")
+				.content("content02")
+				.build(),
+			Post.builder()
+				.member(member)
+				.folder(folder02)
+				.title("title03")
+				.content("content03")
+				.build()
+		);
+		postRepository.saveAll(posts);
+		entityManager.flush();
 
 		// when
-		List<Folder> folders = folderRepository.findAllByMemberWithParent(member);
+		List<FolderPostCountResponse> folderPostCountResponses = folderRepository.findAllWithPostCountByMember(member);
 
 		// then
-		assertThat(folders).hasSize(3)
-			.contains(test01, test02, test03);
+		assertThat(folderPostCountResponses)
+			.hasSize(3)
+			.extracting("folderId", "title", "depth", "orderIndex", "parentFolderId", "postCount")
+			.containsExactly(
+				tuple(folder01.getId(), "test01", 0, 0, null, 2L),
+				tuple(folder02.getId(), "test02", 1, 1, folder01.getId(), 1L),
+				tuple(folder03.getId(), "test03", 2, 2, folder02.getId(), 0L)
+			);
 
 	}
 }
