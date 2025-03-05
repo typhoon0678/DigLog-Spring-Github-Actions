@@ -3,9 +3,11 @@ package api.store.diglog.model.dto.folder;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor
+@Builder
 @Getter
 public class FolderPostCountResponse {
 
