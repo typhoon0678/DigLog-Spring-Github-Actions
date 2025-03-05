@@ -1,6 +1,7 @@
 package api.store.diglog.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,10 +23,17 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
+import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.entity.Post;
+import api.store.diglog.repository.FolderRepository;
 import api.store.diglog.repository.MemberRepository;
+import api.store.diglog.repository.PostRepository;
+import jakarta.persistence.EntityManager;
 
+@SuppressWarnings("ALL")
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -39,6 +47,15 @@ class FolderServiceTest {
 
 	@Autowired
 	private FolderService folderService;
+
+	@Autowired
+	private FolderRepository folderRepository;
+
+	@Autowired
+	private PostRepository postRepository;
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@BeforeEach
 	void setUp() {
@@ -56,6 +73,83 @@ class FolderServiceTest {
 
 		BDDMockito.given(memberService.getCurrentMember())
 			.willReturn(member);
+	}
+
+	@DisplayName("폴더를 조회할 수 있다.")
+	@Test
+	void getFoldersWithPostCount() {
+
+		// given
+		Member member = memberRepository.findByUsername("testUser").get();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("test01")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+		Folder folder02 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("test02")
+			.depth(1)
+			.orderIndex(1)
+			.parentFolder(folder01)
+			.build();
+		Folder folder03 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("test03")
+			.depth(2)
+			.orderIndex(2)
+			.parentFolder(folder02)
+			.build();
+
+		folderRepository.saveAll(List.of(folder01, folder02, folder03));
+		entityManager.flush();
+
+		List<Post> posts = List.of(
+			Post.builder()
+				.member(member)
+				.folder(folder01)
+				.title("title01")
+				.content("content01")
+				.build(),
+			Post.builder()
+				.member(member)
+				.folder(folder01)
+				.title("title02")
+				.content("content02")
+				.build(),
+			Post.builder()
+				.member(member)
+				.folder(folder02)
+				.title("title03")
+				.content("content03")
+				.build()
+		);
+		postRepository.saveAll(posts);
+		entityManager.flush();
+
+		BDDMockito.given(memberService.findActiveMemberByUsername(any()))
+			.willReturn(member);
+
+		// when
+		List<FolderPostCountResponse> folderPostCountResponses = folderService.getFoldersWithPostCount(
+			member.getUsername());
+
+		// then
+		assertThat(folderPostCountResponses)
+			.hasSize(3)
+			.extracting("folderId", "title", "depth", "orderIndex", "parentFolderId", "postCount")
+			.containsExactly(
+				tuple(folder01.getId(), "test01", 0, 0, null, 2L),
+				tuple(folder02.getId(), "test02", 1, 1, folder01.getId(), 1L),
+				tuple(folder03.getId(), "test03", 2, 2, folder02.getId(), 0L)
+			);
+
 	}
 
 	@DisplayName("새로운 폴더 목록을 생성할 수 있다.")
