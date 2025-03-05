@@ -2,6 +2,7 @@ package api.store.diglog.model.entity;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import api.store.diglog.common.exception.CustomException;
@@ -21,12 +22,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-//@Table(
-//	name = "folder",
-//	uniqueConstraints = {
-//		@UniqueConstraint(columnNames = {"member_id", "parent_id", "title"})
-//	}
-//)
+@Table(
+	name = "folder",
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"member_id", "parent_id", "title"})
+	}
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Folder {
@@ -103,4 +104,18 @@ public class Folder {
 		}
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Folder folder = (Folder)o;
+		return Objects.equals(id, folder.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
 }
