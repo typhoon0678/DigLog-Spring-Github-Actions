@@ -6,6 +6,7 @@ import api.store.diglog.model.dto.comment.CommentResponse;
 import api.store.diglog.model.dto.comment.CommentUpdateRequest;
 import api.store.diglog.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CommentResponse>> getComments(CommentListRequest commentListRequest) {
+    public ResponseEntity<Page<CommentResponse>> getComments(@ParameterObject @ModelAttribute CommentListRequest commentListRequest) {
         Page<CommentResponse> comments = commentService.getComments(commentListRequest);
 
         return ResponseEntity.ok().body(comments);

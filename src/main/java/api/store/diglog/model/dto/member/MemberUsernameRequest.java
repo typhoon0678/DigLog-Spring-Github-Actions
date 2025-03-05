@@ -1,11 +1,12 @@
 package api.store.diglog.model.dto.member;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberUsernameRequest {
 
-    private final String username;
+    private String username;
 }

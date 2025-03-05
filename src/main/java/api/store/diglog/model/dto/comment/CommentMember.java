@@ -1,12 +1,13 @@
 package api.store.diglog.model.dto.comment;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentMember {
 
-    private final String username;
-    private final String profileUrl;
+    private String username;
+    private String profileUrl;
 }

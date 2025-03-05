@@ -1,16 +1,17 @@
 package api.store.diglog.model.dto.post;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostRequest {
 
-    private final String title;
-    private final String content;
-    private final List<String> tagNames;
-    private final List<String> urls;
+    private String title;
+    private String content;
+    private List<String> tagNames;
+    private List<String> urls;
 }

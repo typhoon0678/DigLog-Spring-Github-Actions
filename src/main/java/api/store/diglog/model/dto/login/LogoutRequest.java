@@ -1,11 +1,12 @@
 package api.store.diglog.model.dto.login;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class LogoutRequest {
 
-    private final String email;
+    private String email;
 }
