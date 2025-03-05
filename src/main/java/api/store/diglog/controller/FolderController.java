@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.service.FolderService;
 import jakarta.validation.Valid;
@@ -24,10 +25,11 @@ public class FolderController {
 	private final FolderService folderService;
 
 	@GetMapping("/{username}")
-	public ResponseEntity<List<FolderResponse>> getFoldersBy(@PathVariable("username") String username) {
+	public ResponseEntity<List<FolderPostCountResponse>> getFoldersWithPostCountBy(
+		@PathVariable("username") String username) {
 
-		List<FolderResponse> folderResponses = folderService.getFolders(username);
-		return ResponseEntity.ok().body(folderResponses);
+		List<FolderPostCountResponse> folderPostCountResponses = folderService.getFoldersWithPostCount(username);
+		return ResponseEntity.ok().body(folderPostCountResponses);
 	}
 
 	@PutMapping

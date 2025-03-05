@@ -2,7 +2,6 @@ package api.store.diglog.service;
 
 import static api.store.diglog.common.exception.ErrorCode.*;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
@@ -27,25 +27,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class FolderService {
-
 	private static final int MAX_FOLDER_SIZE = 100;
+
 	private static final String UNDER_BAR_SIGN = "_";
 
 	private final FolderRepository folderRepository;
 	private final MemberService memberService;
 
-	public List<FolderResponse> getFolders(String username) {
+	public List<FolderPostCountResponse> getFoldersWithPostCount(String username) {
 
 		Member member = memberService.findActiveMemberByUsername(username);
-
-		List<Folder> folders = folderRepository.findAllByMemberWithParent(member);
-		return folders.stream()
-			.map(folder -> FolderResponse.builder()
-				.folder(folder)
-				.build())
-			.sorted(Comparator.comparing(FolderResponse::getOrderIndex))
-			.toList();
-
+		return folderRepository.findAllWithPostCountByMember(member);
 	}
 
 	@Transactional
