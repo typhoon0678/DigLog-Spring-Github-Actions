@@ -1,15 +1,16 @@
 package api.store.diglog.model.dto.comment;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentUpdateRequest {
 
-    private final UUID id;
-    private final String content;
-    private final String taggedUsername;
+    private UUID id;
+    private String content;
+    private String taggedUsername;
 }

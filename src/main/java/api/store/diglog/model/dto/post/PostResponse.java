@@ -2,32 +2,24 @@ package api.store.diglog.model.dto.post;
 
 import api.store.diglog.model.dto.tag.TagResponse;
 import api.store.diglog.model.entity.Post;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostResponse {
 
-    private final UUID id;
-    private final String title;
-    private final String content;
-    private final String username;
-    private final List<TagResponse> tags;
-    private final LocalDateTime createdAt;
-
-    @Builder
-    public PostResponse(UUID id, String title, String content, String username, List<TagResponse> tags, LocalDateTime createdAt) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.username = username;
-        this.tags = tags;
-        this.createdAt = createdAt;
-    }
+    private UUID id;
+    private String title;
+    private String content;
+    private String username;
+    private List<TagResponse> tags;
+    private LocalDateTime createdAt;
 
     public PostResponse(Post post) {
         this.id = post.getId();

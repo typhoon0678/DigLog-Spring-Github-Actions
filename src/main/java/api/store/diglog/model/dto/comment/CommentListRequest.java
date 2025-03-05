@@ -1,16 +1,18 @@
 package api.store.diglog.model.dto.comment;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentListRequest {
 
-    private final UUID postId;
-    private final UUID parentCommentId;
-    private final int page;
-    private final int size;
+    private UUID postId;
+    private UUID parentCommentId;
+    private int page;
+    private int size;
 }

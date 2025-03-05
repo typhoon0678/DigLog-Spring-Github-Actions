@@ -1,16 +1,17 @@
 package api.store.diglog.model.dto.member;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.Set;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberInfoResponse {
 
-    private final int status;
-    private final String email;
-    private final String username;
-    private final Set<String> roles;
+    private int status;
+    private String email;
+    private String username;
+    private Set<String> roles;
 }
