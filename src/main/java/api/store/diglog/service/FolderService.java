@@ -38,7 +38,7 @@ public class FolderService {
 
 		Member member = memberService.findActiveMemberByUsername(username);
 
-		List<Folder> folders = folderRepository.findAllByMember(member);
+		List<Folder> folders = folderRepository.findAllByMemberWithParent(member);
 		return folders.stream()
 			.map(folder -> FolderResponse.builder()
 				.folder(folder)
