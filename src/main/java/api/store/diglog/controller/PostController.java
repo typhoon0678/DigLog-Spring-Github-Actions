@@ -31,6 +31,13 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/folder")
+    public ResponseEntity<Void> updateFolder(@RequestBody PostFolderUpdateRequest postFolderUpdateRequest) {
+        postService.updateFolder(postFolderUpdateRequest);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPost(@PathVariable UUID id) {
         PostResponse postResponse = postService.getPost(id);

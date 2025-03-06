@@ -9,11 +9,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class PostRequest {
+public class PostFolderUpdateRequest {
 
-    private String title;
-    private String content;
+    private List<UUID> postIds;
     private UUID folderId;
-    private List<String> tagNames;
-    private List<String> urls;
 }
