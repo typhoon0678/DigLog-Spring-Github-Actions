@@ -61,4 +61,8 @@ public class Post {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public void updateFolder(Folder folder) {
+        this.folder = folder;
+    }
 }

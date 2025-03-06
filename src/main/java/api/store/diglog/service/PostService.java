@@ -88,6 +88,17 @@ public class PostService {
         return tagService.saveAll(tagPostVO);
     }
 
+    @Transactional
+    public void updateFolder(PostFolderUpdateRequest postFolderUpdateRequest) {
+        Member member = memberService.getCurrentMember();
+        Folder folder = folderService.getFolderByIdAndMemberId(postFolderUpdateRequest.getFolderId(), member.getId());
+
+        List<Post> posts = postRepository.findAllByIdInAndMemberId(postFolderUpdateRequest.getPostIds(), member.getId());
+
+        posts.forEach(post -> post.updateFolder(folder));
+        postRepository.saveAll(posts);
+    }
+
     public PostResponse getPost(UUID id) {
         Post post = postRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
