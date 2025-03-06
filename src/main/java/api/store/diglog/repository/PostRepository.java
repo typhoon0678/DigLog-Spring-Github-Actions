@@ -27,6 +27,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     Page<Post> findAllByMemberIdAndIsDeletedFalse(UUID memberId, Pageable pageable);
 
+    Page<Post> findAllByMemberIdAndFolderIdInAndIsDeletedFalse(UUID memberId, List<UUID> folderIds, Pageable pageable);
+
     List<Post> findAllByIdInAndMemberId(List<UUID> ids, UUID memberId);
 
     @Modifying

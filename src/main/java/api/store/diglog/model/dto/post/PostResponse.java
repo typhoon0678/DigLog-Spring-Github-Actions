@@ -1,5 +1,6 @@
 package api.store.diglog.model.dto.post;
 
+import api.store.diglog.model.dto.folder.FolderPostResponse;
 import api.store.diglog.model.dto.tag.TagResponse;
 import api.store.diglog.model.entity.Post;
 import lombok.*;
@@ -18,6 +19,7 @@ public class PostResponse {
     private String title;
     private String content;
     private String username;
+    private FolderPostResponse folder;
     private List<TagResponse> tags;
     private LocalDateTime createdAt;
 
@@ -30,5 +32,12 @@ public class PostResponse {
                 .map(TagResponse::new)
                 .toList();
         this.createdAt = post.getCreatedAt();
+
+        if (post.getFolder() != null) {
+            this.folder = FolderPostResponse.builder()
+                    .id(post.getFolder().getId())
+                    .title(post.getFolder().getTitle())
+                    .build();
+        }
     }
 }
