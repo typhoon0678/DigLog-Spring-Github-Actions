@@ -94,6 +94,11 @@ public class PostService {
         Folder folder = folderService.getFolderByIdAndMemberId(postFolderUpdateRequest.getFolderId(), member.getId());
 
         List<Post> posts = postRepository.findAllByIdInAndMemberId(postFolderUpdateRequest.getPostIds(), member.getId());
+        posts.forEach(post -> {
+            if (!post.getMember().equals(member)) {
+                throw new CustomException(POST_NO_PERMISSION);
+            }
+        });
 
         posts.forEach(post -> post.updateFolder(folder));
         postRepository.saveAll(posts);

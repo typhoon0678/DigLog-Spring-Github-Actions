@@ -2,11 +2,14 @@ package api.store.diglog.controller;
 
 import api.store.diglog.common.auth.JWTUtil;
 import api.store.diglog.model.constant.Role;
+import api.store.diglog.model.dto.post.PostFolderUpdateRequest;
 import api.store.diglog.model.dto.post.PostRequest;
 import api.store.diglog.model.dto.post.PostUpdateRequest;
+import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
 import api.store.diglog.model.entity.Post;
 import api.store.diglog.model.entity.Tag;
+import api.store.diglog.repository.FolderRepository;
 import api.store.diglog.repository.MemberRepository;
 import api.store.diglog.repository.PostRepository;
 import api.store.diglog.repository.TagRepository;
@@ -54,10 +57,13 @@ class PostControllerTest {
     PostRepository postRepository;
     @Autowired
     private TagRepository tagRepository;
+    @Autowired
+    private FolderRepository folderRepository;
 
     @AfterEach
     void afterEach() {
         postRepository.deleteAll();
+        folderRepository.deleteAll();
         tagRepository.deleteAll();
         memberRepository.deleteAll();
     }
@@ -69,6 +75,7 @@ class PostControllerTest {
         PostRequest dto = PostRequest.builder()
                 .title("title")
                 .content("content")
+                .folderId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                 .urls(List.of("url1", "url2"))
                 .tagNames(List.of("tag1", "tag2"))
                 .build();
@@ -93,10 +100,19 @@ class PostControllerTest {
         Member member = memberRepository.save(defaultMember("test2@example.com"));
         Tag tag = tagRepository.save(defaultTag("tag"));
         Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
+        UUID folderId = UUID.randomUUID();
+        folderRepository.save(Folder.builder()
+                .id(folderId)
+                .title("title")
+                .member(member)
+                .depth(0)
+                .orderIndex(0)
+                .build());
         PostUpdateRequest dto = PostUpdateRequest.builder()
                 .id(post.getId())
                 .title("update title")
                 .content("update content")
+                .folderId(folderId)
                 .urls(List.of("url2", "url3"))
                 .tagNames(List.of("tag1", "tag2"))
                 .build();
@@ -125,6 +141,7 @@ class PostControllerTest {
                 .id(post.getId())
                 .title("update title")
                 .content("update content")
+                .folderId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                 .urls(List.of("url2", "url3"))
                 .tagNames(List.of("tag2", "tag3"))
                 .build();
@@ -140,6 +157,142 @@ class PostControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(403);
+    }
+
+    @Test
+    @DisplayName("본인 소유가 아닌 폴더로 게시글 수정에 실패한다.")
+    void update3() throws Exception {
+        // given
+        Member member = memberRepository.save(defaultMember("test2@example.com"));
+        Tag tag = tagRepository.save(defaultTag("tag"));
+        Post post = postRepository.save(defaultPost("test title", member, List.of(tag)));
+        PostUpdateRequest dto = PostUpdateRequest.builder()
+                .id(post.getId())
+                .title("update title")
+                .content("update content")
+                .folderId(UUID.fromString("00000000-0000-0000-0000-111111111111"))
+                .urls(List.of("url2", "url3"))
+                .tagNames(List.of("tag2", "tag3"))
+                .build();
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/post")
+                        .header("Authorization", getAuthorization("test2@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    @DisplayName("여러 게시글의 폴더 업데이트에 성공한다.")
+    void updateFolder() throws Exception {
+        // given
+        Member member = memberRepository.findById(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")).get();
+        UUID folderId = UUID.randomUUID();
+        folderRepository.save(Folder.builder()
+                .id(folderId)
+                .title("title")
+                .member(member)
+                .depth(0)
+                .orderIndex(0)
+                .build());
+        PostFolderUpdateRequest dto = PostFolderUpdateRequest.builder()
+                .postIds(List.of(
+                        UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111112"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111113")))
+                .folderId(folderId)
+                .build();
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/post/folder")
+                        .header("Authorization", getAuthorization("test@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("빈 폴더로 업데이트에 성공한다.")
+    void updateFolder2() throws Exception {
+        // given
+        PostFolderUpdateRequest dto = PostFolderUpdateRequest.builder()
+                .postIds(List.of(
+                        UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111112"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111113")))
+                .build();
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/post/folder")
+                        .header("Authorization", getAuthorization("test@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("본인이 갖고있지 않은 폴더 id로 업데이트에 실패한다.")
+    void updateFolder3() throws Exception {
+        // given
+        PostFolderUpdateRequest dto = PostFolderUpdateRequest.builder()
+                .postIds(List.of(
+                        UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111112"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111113")))
+                .folderId(UUID.randomUUID())
+                .build();
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/post/folder")
+                        .header("Authorization", getAuthorization("test@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    @DisplayName("다른 사용자의 게시글 폴더 업데이트에 실패한다.")
+    void updateFolder4() throws Exception {
+        // given
+        PostFolderUpdateRequest dto = PostFolderUpdateRequest.builder()
+                .postIds(List.of(
+                        UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111112"),
+                        UUID.fromString("11111111-1111-1111-1111-111111111113")))
+                .build();
+
+        // when
+        MvcResult result = mockMvc.perform(patch("/api/post/folder")
+                        .header("Authorization", getAuthorization("test2@example.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 
     @Test
