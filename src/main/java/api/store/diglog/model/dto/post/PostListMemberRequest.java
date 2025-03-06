@@ -2,6 +2,7 @@ package api.store.diglog.model.dto.post;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class PostListMemberRequest {
 
     private String username;
-    private UUID folderId;
+    private List<UUID> folderIds;
     private int page;
     private int size;
 }

@@ -156,4 +156,8 @@ public class FolderService {
         return folderRepository.findByIdAndMemberId(folderId, memberId)
                 .orElseThrow(() -> new CustomException(FOLDER_OWNER_MISMATCH));
     }
+
+	public List<Folder> getFoldersByIdList(List<UUID> folderIds) {
+		return folderRepository.findAllByIdIn(folderIds);
+	}
 }

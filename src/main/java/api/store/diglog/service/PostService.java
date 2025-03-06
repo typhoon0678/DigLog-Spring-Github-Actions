@@ -162,7 +162,15 @@ public class PostService {
                 Sort.by("createdAt", "id").descending());
         Member member = memberService.findActiveMemberByUsername(postListMemberRequest.getUsername());
 
-        return postRepository.findAllByMemberIdAndIsDeletedFalse(member.getId(), pageable)
+        if (postListMemberRequest.getFolderIds().isEmpty()) {
+            return postRepository.findAllByMemberIdAndIsDeletedFalse(member.getId(), pageable)
+                    .map(PostResponse::new);
+        }
+
+        List<UUID> folderIds = folderService.getFoldersByIdList(postListMemberRequest.getFolderIds())
+                .stream().map(Folder::getId)
+                .toList();
+        return postRepository.findAllByMemberIdAndFolderIdInAndIsDeletedFalse(member.getId(), folderIds, pageable)
                 .map(PostResponse::new);
     }
 
