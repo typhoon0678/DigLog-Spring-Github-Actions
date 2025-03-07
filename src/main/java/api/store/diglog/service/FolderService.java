@@ -154,4 +154,17 @@ public class FolderService {
 			.parentFolder(parentFolder)
 			.build();
 	}
+
+	public Folder getFolderByIdAndMemberId(UUID folderId, UUID memberId) {
+        if (folderId == null) {
+            return null;
+        }
+
+        return folderRepository.findByIdAndMemberId(folderId, memberId)
+                .orElseThrow(() -> new CustomException(FOLDER_OWNER_MISMATCH));
+    }
+
+	public List<Folder> getFoldersByIdList(List<UUID> folderIds) {
+		return folderRepository.findAllByIdIn(folderIds);
+	}
 }

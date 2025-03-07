@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,10 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findAllByTitleContainingIgnoreCaseOrTagsNameContainingIgnoreCaseAndIsDeletedFalse(String title, String tagName, Pageable pageable);
 
     Page<Post> findAllByMemberIdAndIsDeletedFalse(UUID memberId, Pageable pageable);
+
+    Page<Post> findAllByMemberIdAndFolderIdInAndIsDeletedFalse(UUID memberId, List<UUID> folderIds, Pageable pageable);
+
+    List<Post> findAllByIdInAndMemberId(List<UUID> ids, UUID memberId);
 
     @Modifying
     @Transactional
