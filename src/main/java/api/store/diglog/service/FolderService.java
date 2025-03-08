@@ -16,11 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderDeleteRequest;
 import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
+import api.store.diglog.model.entity.Post;
 import api.store.diglog.repository.FolderRepository;
+import api.store.diglog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,6 +36,7 @@ public class FolderService {
 
 	private final FolderRepository folderRepository;
 	private final MemberService memberService;
+	private final PostRepository postRepository;
 
 	public List<FolderPostCountResponse> getFoldersWithPostCount(String username) {
 
@@ -50,7 +54,7 @@ public class FolderService {
 		Member member = memberService.getCurrentMember();
 		Map<Integer, Folder> allFolders = new TreeMap<>();
 
-		int maxDepth = calculateMaxDepth(folderCreateRequests);
+		int maxDepth = calculateMaxDepthFromRequests(folderCreateRequests);
 		IntStream.range(0, maxDepth + 1)
 			.forEach(depth -> {
 				Map<Integer, Folder> foldersAtCurrentDepth = createAndUpdateFoldersByDepth(
@@ -108,10 +112,9 @@ public class FolderService {
 		}
 	}
 
-	private int calculateMaxDepth(List<FolderCreateRequest> folderCreateRequests) {
+	private int calculateMaxDepthFromRequests(List<FolderCreateRequest> folderCreateRequests) {
 		return folderCreateRequests.stream()
-			.map(FolderCreateRequest::getDepth)
-			.mapToInt(depth -> depth)
+			.mapToInt(FolderCreateRequest::getDepth)
 			.max()
 			.orElse(0);
 	}
@@ -156,15 +159,89 @@ public class FolderService {
 	}
 
 	public Folder getFolderByIdAndMemberId(UUID folderId, UUID memberId) {
-        if (folderId == null) {
-            return null;
-        }
+		if (folderId == null) {
+			return null;
+		}
 
-        return folderRepository.findByIdAndMemberId(folderId, memberId)
-                .orElseThrow(() -> new CustomException(FOLDER_OWNER_MISMATCH));
-    }
+		return folderRepository.findByIdAndMemberId(folderId, memberId)
+			.orElseThrow(() -> new CustomException(FOLDER_OWNER_MISMATCH));
+	}
 
 	public List<Folder> getFoldersByIdList(List<UUID> folderIds) {
 		return folderRepository.findAllByIdIn(folderIds);
+	}
+
+	@Transactional
+	public void deleteAllBy(List<FolderDeleteRequest> folderDeleteRequests) {
+
+		List<UUID> folderIds = folderDeleteRequests.stream()
+			.map(FolderDeleteRequest::getFolderId)
+			.toList();
+
+		validateChildFolders(folderIds);
+		validateContainsPosts(folderIds);
+
+		List<Folder> folders = folderRepository.findAllByIdIn(folderIds);
+		int max = calculateMaxDepthFromFolders(folders);
+		int min = calculateMinDepthFromFolders(folders);
+
+		for (int depth = max; depth >= min; depth--) {
+			deleteAllByDepth(folders, depth);
+		}
+
+	}
+
+	private void validateChildFolders(List<UUID> folderIds) {
+		List<Folder> childFolders = folderRepository.findAllByParentFolderIdIn(folderIds);
+
+		childFolders.stream()
+			.filter(childFolder -> !folderIds.contains(childFolder.getId()))
+			.findFirst()
+			.ifPresent(folder -> {
+				throw new CustomException(
+					FOLDER_EXIST_CHILD_FOLDER,
+					String.format(
+						FOLDER_EXIST_CHILD_FOLDER.getMessage(),
+						folder.getParentFolder().getTitle(),
+						folder.getTitle()
+					)
+				);
+			});
+	}
+
+	private void validateContainsPosts(List<UUID> folderIds) {
+		List<Post> posts = postRepository.findAllByFolderIdIn(folderIds);
+
+		if (!posts.isEmpty()) {
+			Post post = posts.getFirst();
+			throw new CustomException(
+				FOLDER_CONTAIN_POST,
+				String.format(FOLDER_CONTAIN_POST.getMessage(),
+					post.getFolder().getTitle(),
+					post.getTitle())
+			);
+		}
+	}
+
+	private int calculateMaxDepthFromFolders(List<Folder> folders) {
+		return folders.stream()
+			.mapToInt(Folder::getDepth)
+			.max()
+			.orElse(0);
+	}
+
+	private int calculateMinDepthFromFolders(List<Folder> folders) {
+		return folders.stream()
+			.mapToInt(Folder::getDepth)
+			.min()
+			.orElse(0);
+	}
+
+	private void deleteAllByDepth(List<Folder> folders, int depth) {
+		folderRepository.deleteAllInBatch(
+			folders.stream()
+				.filter(folder -> folder.getDepth() == depth)
+				.toList()
+		);
 	}
 }
