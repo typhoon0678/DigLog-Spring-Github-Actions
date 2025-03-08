@@ -42,6 +42,7 @@ public class SecurityConfig {
         String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*", "/api/member/profile/search/*", "/api/verify/**"};
         String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/search"};
         String[] commentGetApi = {"/api/comment"};
+        String[] folderGetApi = {"/api/folders/**"};
 
         http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -49,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(memberApi).permitAll()
                         .requestMatchers(HttpMethod.GET, postGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, commentGetApi).permitAll()
+                        .requestMatchers(HttpMethod.GET, folderGetApi).permitAll()
                         .anyRequest().authenticated())
 
                 .csrf(AbstractHttpConfigurer::disable)

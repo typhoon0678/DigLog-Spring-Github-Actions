@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
@@ -137,5 +138,69 @@ class FolderControllerTest {
 			.andExpect(jsonPath("$[2].depth").value(0))
 			.andExpect(jsonPath("$[2].orderIndex").value(2))
 			.andExpect(jsonPath("$[2].parentFolderId").value("none"));
+	}
+
+	@DisplayName("회원 이름을 통해 게시글 개수가 포함된 폴더 목록을 조회할 수 있다.")
+	@Test
+	@WithMockUser(username = EMAIL, password = PASSWORD)
+	void getFoldersWithPostCount() throws Exception {
+
+		List<FolderPostCountResponse> folderPostCountResponses = List.of(
+			FolderPostCountResponse.builder()
+				.folderId(UUID.randomUUID())
+				.title("test01")
+				.depth(0)
+				.orderIndex(0)
+				.parentFolderId(null)
+				.postCount(1L)
+				.build(),
+			FolderPostCountResponse.builder()
+				.folderId(UUID.randomUUID())
+				.title("test02")
+				.depth(0)
+				.orderIndex(1)
+				.parentFolderId(null)
+				.postCount(2L)
+				.build(),
+			FolderPostCountResponse.builder()
+				.folderId(UUID.randomUUID())
+				.title("test03")
+				.depth(0)
+				.orderIndex(2)
+				.parentFolderId(null)
+				.postCount(3L)
+				.build()
+		);
+
+		BDDMockito.given(folderService.getFoldersWithPostCount(any()))
+			.willReturn(folderPostCountResponses);
+
+		mockMvc.perform(
+				get("/api/folders/testUser")
+					.with(csrf())
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON)
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.length()").value(3))
+			.andExpect(jsonPath("$[0].folderId").value(folderPostCountResponses.get(0).getFolderId().toString()))
+			.andExpect(jsonPath("$[0].title").value("test01"))
+			.andExpect(jsonPath("$[0].depth").value(0))
+			.andExpect(jsonPath("$[0].orderIndex").value(0))
+			.andExpect(jsonPath("$[0].parentFolderId").doesNotExist())
+			.andExpect(jsonPath("$[0].postCount").value(1L))
+			.andExpect(jsonPath("$[1].folderId").value(folderPostCountResponses.get(1).getFolderId().toString()))
+			.andExpect(jsonPath("$[1].title").value("test02"))
+			.andExpect(jsonPath("$[1].depth").value(0))
+			.andExpect(jsonPath("$[1].orderIndex").value(1))
+			.andExpect(jsonPath("$[1].parentFolderId").doesNotExist())
+			.andExpect(jsonPath("$[1].postCount").value(2L))
+			.andExpect(jsonPath("$[2].folderId").value(folderPostCountResponses.get(2).getFolderId().toString()))
+			.andExpect(jsonPath("$[2].title").value("test03"))
+			.andExpect(jsonPath("$[2].depth").value(0))
+			.andExpect(jsonPath("$[2].orderIndex").value(2))
+			.andExpect(jsonPath("$[2].parentFolderId").doesNotExist())
+			.andExpect(jsonPath("$[2].postCount").value(3L));
 	}
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
 import api.store.diglog.model.entity.Member;
@@ -26,12 +27,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class FolderService {
-
 	private static final int MAX_FOLDER_SIZE = 100;
+
 	private static final String UNDER_BAR_SIGN = "_";
 
 	private final FolderRepository folderRepository;
 	private final MemberService memberService;
+
+	public List<FolderPostCountResponse> getFoldersWithPostCount(String username) {
+
+		Member member = memberService.findActiveMemberByUsername(username);
+		return folderRepository.findAllWithPostCountByMember(member);
+	}
 
 	@Transactional
 	public List<FolderResponse> createAndUpdateFolders(List<FolderCreateRequest> folderCreateRequests) {
