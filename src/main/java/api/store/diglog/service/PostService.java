@@ -174,6 +174,16 @@ public class PostService {
                 .map(PostResponse::new);
     }
 
+    public Page<PostResponse> getMemberTagPosts(PostListMemberTagRequest postListMemberTagRequest) {
+        Pageable pageable = PageRequest.of(postListMemberTagRequest.getPage(), postListMemberTagRequest.getSize(),
+                Sort.by("createdAt", "id").descending());
+        String username = postListMemberTagRequest.getUsername();
+        UUID tagId = postListMemberTagRequest.getTagId();
+
+        return postRepository.findAllByMemberUsernameAndTagsIdAndIsDeletedFalse(username, tagId, pageable)
+                .map(PostResponse::new);
+    }
+
     @Transactional
     public void delete(UUID id) {
         Member member = memberService.getCurrentMember();
