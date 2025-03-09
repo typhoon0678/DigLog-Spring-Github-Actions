@@ -19,7 +19,7 @@ public class TagService {
     private final TagRepository tagRepository;
 
     public List<TagResponse> getMemberTags(String username) {
-        return tagRepository.findAllByPostsMemberUsername(username)
+        return tagRepository.findAllByPostsMemberUsernameOrderByName(username)
                 .stream().map(TagResponse::new).toList();
     }
 
