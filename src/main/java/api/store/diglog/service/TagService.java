@@ -1,5 +1,6 @@
 package api.store.diglog.service;
 
+import api.store.diglog.model.dto.tag.TagResponse;
 import api.store.diglog.model.entity.Tag;
 import api.store.diglog.model.vo.tag.TagPostVO;
 import api.store.diglog.repository.TagRepository;
@@ -16,6 +17,11 @@ import java.util.List;
 public class TagService {
 
     private final TagRepository tagRepository;
+
+    public List<TagResponse> getMemberTags(String username) {
+        return tagRepository.findAllByPostsMemberUsernameOrderByName(username)
+                .stream().map(TagResponse::new).toList();
+    }
 
     @Transactional
     public List<Tag> saveAll(TagPostVO tagPostVO) {

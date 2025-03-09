@@ -59,8 +59,15 @@ public class PostController {
         return ResponseEntity.ok().body(postResponses);
     }
 
+    @GetMapping("/member/tag")
+    public ResponseEntity<Page<PostResponse>> getMemberTagPosts(@ParameterObject @ModelAttribute PostListMemberTagRequest postListMemberTagRequest) {
+        Page<PostResponse> postResponses = postService.getMemberTagPosts(postListMemberTagRequest);
+
+        return ResponseEntity.ok().body(postResponses);
+    }
+
     @GetMapping("/search")
-    public ResponseEntity<Page<PostResponse>> getPostsTag(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
+    public ResponseEntity<Page<PostResponse>> searchPosts(@ParameterObject @ModelAttribute PostListSearchRequest postListSearchRequest) {
         Page<PostResponse> postResponses = postService.searchPosts(postListSearchRequest);
 
         return ResponseEntity.ok().body(postResponses);

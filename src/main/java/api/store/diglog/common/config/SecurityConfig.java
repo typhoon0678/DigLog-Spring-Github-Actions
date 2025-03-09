@@ -40,9 +40,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
         String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*", "/api/member/profile/search/*", "/api/verify/**"};
-        String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/search"};
+        String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/member/tag"};
         String[] commentGetApi = {"/api/comment"};
         String[] folderGetApi = {"/api/folders/**"};
+        String[] tagGetApi = {"/api/tag/**"};
 
         http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -51,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, postGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, commentGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, folderGetApi).permitAll()
+                        .requestMatchers(HttpMethod.GET, tagGetApi).permitAll()
                         .anyRequest().authenticated())
 
                 .csrf(AbstractHttpConfigurer::disable)
