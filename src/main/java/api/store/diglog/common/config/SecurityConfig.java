@@ -4,13 +4,13 @@ import api.store.diglog.common.auth.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
@@ -30,15 +30,10 @@ public class SecurityConfig {
     private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final UserDetailsService inMemoryActuatorUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        String[] swaggerApi = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**"};
         String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*", "/api/member/profile/search/*", "/api/verify/**"};
         String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/member/tag"};
         String[] commentGetApi = {"/api/comment"};
@@ -46,14 +41,14 @@ public class SecurityConfig {
         String[] tagGetApi = {"/api/tag/**"};
 
         http
+                .securityMatcher("/api/**")
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(swaggerApi).permitAll()
                         .requestMatchers(memberApi).permitAll()
                         .requestMatchers(HttpMethod.GET, postGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, commentGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, folderGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, tagGetApi).permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/**").authenticated())
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -78,5 +73,25 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint));
 
         return http.build();
+    }
+
+
+    @Bean
+    public SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
+        String[] apis = {"/swagger-ui/**", "/bus/v3/api-docs/**", "/v3/api-docs/**", "/actuator/**"};
+
+        http
+                .securityMatcher(apis)
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(apis).hasRole("ADMIN")
+                        .anyRequest().permitAll())
+
+                .httpBasic(Customizer.withDefaults())
+
+                .userDetailsService(inMemoryActuatorUserDetailsService)
+
+                .build();
+
+        return http.getOrBuild();
     }
 }
