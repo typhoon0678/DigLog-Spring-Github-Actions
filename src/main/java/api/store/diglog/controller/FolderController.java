@@ -46,6 +46,6 @@ public class FolderController {
 	public ResponseEntity<String> deleteAll(@RequestBody List<FolderDeleteRequest> folderDeleteRequests) {
 
 		folderService.deleteAllBy(folderDeleteRequests);
-		return ResponseEntity.ok().body("삭제 완료");
+		return ResponseEntity.noContent().build();
 	}
 }
