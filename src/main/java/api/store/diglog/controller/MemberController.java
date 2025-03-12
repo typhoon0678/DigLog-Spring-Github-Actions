@@ -36,7 +36,7 @@ public class MemberController {
     }
 
     @GetMapping("/profile/{username}")
-    public ResponseEntity<MemberProfileInfoResponse> getProfileByUsername(@PathVariable String username) {
+    public ResponseEntity<MemberProfileInfoResponse> getProfileByUsername(@PathVariable("username") String username) {
         MemberProfileInfoResponse memberProfileInfoResponse = memberService.getProfileByUsername(username);
 
         return ResponseEntity.ok().body(memberProfileInfoResponse);

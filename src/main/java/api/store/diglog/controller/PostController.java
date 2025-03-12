@@ -39,7 +39,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@PathVariable UUID id) {
+    public ResponseEntity<PostResponse> getPost(@PathVariable("id") UUID id) {
         PostResponse postResponse = postService.getPost(id);
 
         return ResponseEntity.ok().body(postResponse);
@@ -74,7 +74,7 @@ public class PostController {
     }
 
     @PatchMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         postService.delete(id);
 
         return ResponseEntity.ok().build();
