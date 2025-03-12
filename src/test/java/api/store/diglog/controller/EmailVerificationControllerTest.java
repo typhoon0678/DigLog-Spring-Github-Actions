@@ -18,6 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,7 +45,14 @@ class EmailVerificationControllerTest {
                 .code("123456")
                 .build();
 
-        emailVerificationRepository.save(emailVerification);
+
+        EmailVerification emailVerificationVerified = EmailVerification.builder()
+                .verified(true)
+                .email("test_verified@example.com")
+                .code("123456")
+                .build();
+
+        emailVerificationRepository.saveAll(List.of(emailVerification, emailVerificationVerified));
     }
 
     @AfterEach
@@ -120,10 +129,8 @@ class EmailVerificationControllerTest {
     @DisplayName("회원가입 정보를 입력하면 회원가입이 완료된다.")
     void verifyAndSignup() throws Exception {
         // given
-        emailVerificationRepository.updateVerifiedTrue("test@example.com");
-
         EmailVerificationSignupRequest dto = EmailVerificationSignupRequest.builder()
-                .email("test@example.com")
+                .email("test_verified@example.com")
                 .password("qwer1234")
                 .code("123456")
                 .build();
@@ -138,10 +145,8 @@ class EmailVerificationControllerTest {
     @DisplayName("입력 정보가 잘못된 경우 에러를 띄운다.")
     void verifyAndSignup2() throws Exception {
         // given
-        emailVerificationRepository.updateVerifiedTrue("test@example.com");
-
         EmailVerificationSignupRequest dto = EmailVerificationSignupRequest.builder()
-                .email("test@example.com")
+                .email("test_verified@example.com")
                 .password("qwer1234")
                 .code("567890")
                 .build();

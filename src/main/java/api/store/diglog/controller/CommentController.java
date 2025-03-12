@@ -43,7 +43,7 @@ public class CommentController {
     }
 
     @PatchMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         commentService.delete(id);
 
         return ResponseEntity.noContent().build();
