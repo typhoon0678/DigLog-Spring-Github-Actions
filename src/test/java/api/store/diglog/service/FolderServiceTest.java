@@ -433,18 +433,7 @@ class FolderServiceTest {
 	@Test
 	void deleteAllBy() {
 
-		Member member = Member.builder()
-			.email("frod90@gmail.com")
-			.username("frod")
-			.password("testPassword")
-			.roles(Set.of(Role.ROLE_USER))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-
-		memberRepository.save(member);
-		entityManager.flush();
+		Member member = memberRepository.findByUsername("testUser").get();
 
 		Folder folder01 = Folder.builder()
 			.id(UUID.randomUUID())
@@ -493,18 +482,7 @@ class FolderServiceTest {
 	@Test
 	void deleteAllBy_WithChildFolder() {
 
-		Member member = Member.builder()
-			.email("frod90@gmail.com")
-			.username("frod")
-			.password("testPassword")
-			.roles(Set.of(Role.ROLE_USER))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-
-		memberRepository.save(member);
-		entityManager.flush();
+		Member member = memberRepository.findByUsername("testUser").get();
 
 		Folder folder01 = Folder.builder()
 			.id(UUID.randomUUID())
@@ -548,18 +526,7 @@ class FolderServiceTest {
 	@Test
 	void deleteAllBy_WithPost() {
 
-		Member member = Member.builder()
-			.email("frod90@gmail.com")
-			.username("frod")
-			.password("testPassword")
-			.roles(Set.of(Role.ROLE_USER))
-			.platform(Platform.SERVER)
-			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
-			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
-			.build();
-
-		memberRepository.save(member);
-		entityManager.flush();
+		Member member = memberRepository.findByUsername("testUser").get();
 
 		Folder folder01 = Folder.builder()
 			.id(UUID.randomUUID())
@@ -591,6 +558,45 @@ class FolderServiceTest {
 		assertThatThrownBy(() -> folderService.deleteAllBy(folderDeleteRequests))
 			.isInstanceOf(CustomException.class)
 			.hasMessage("\"프로젝트 A\" 폴더 하위에 \"프로젝트 A 개요\" 게시글이 존재합니다. 먼저 삭제해주세요");
+	}
+
+	@DisplayName("로그인 중인 회원과 폴더 회원이 일치하지 않으면 폴더를 삭제할 수 없다.")
+	@Test
+	void deleteAllBy_WithDifferentMember() {
+
+		Member member = Member.builder()
+			.email("frod90@gmail.com")
+			.username("frod")
+			.password("testPassword")
+			.roles(Set.of(Role.ROLE_USER))
+			.platform(Platform.SERVER)
+			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
+			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
+			.build();
+
+		memberRepository.save(member);
+		entityManager.flush();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("프로젝트 A")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+
+		folderRepository.save(folder01);
+		entityManager.flush();
+
+		List<FolderDeleteRequest> folderDeleteRequests = List.of(
+			FolderDeleteRequest.builder().folderId(folder01.getId()).build()
+		);
+
+		// when, then
+		assertThatThrownBy(() -> folderService.deleteAllBy(folderDeleteRequests))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("로그인 중인 회원 정보와 폴더 회원 정보가 일치하지 않습니다.");
 	}
 
 }
