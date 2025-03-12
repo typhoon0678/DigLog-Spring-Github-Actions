@@ -182,6 +182,8 @@ public class FolderService {
 		validateContainsPosts(folderIds);
 
 		List<Folder> folders = folderRepository.findAllByIdIn(folderIds);
+		validateFolderMember(folders);
+
 		int max = calculateMaxDepthFromFolders(folders);
 		int min = calculateMinDepthFromFolders(folders);
 
@@ -219,6 +221,21 @@ public class FolderService {
 				String.format(FOLDER_CONTAIN_POST.getMessage(),
 					post.getFolder().getTitle(),
 					post.getTitle())
+			);
+		}
+	}
+
+	private void validateFolderMember(List<Folder> folders) {
+
+		Member currentMember = memberService.getCurrentMember();
+
+		boolean isNotMatchMember = folders.stream()
+			.anyMatch(folder -> !folder.getMember().equals(currentMember));
+
+		if (isNotMatchMember) {
+			throw new CustomException(
+				FOLDER_NOT_MATCH_MEMBER,
+				FOLDER_NOT_MATCH_MEMBER.getMessage()
 			);
 		}
 	}

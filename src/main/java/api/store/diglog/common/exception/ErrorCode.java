@@ -46,6 +46,7 @@ public enum ErrorCode {
 	FOLDER_OWNER_MISMATCH(BAD_REQUEST, "멤버가 갖고 있는 폴더 중 해당 폴더를 찾을 수 없습니다."),
 	FOLDER_EXIST_CHILD_FOLDER(BAD_REQUEST, "\"%s\" 폴더 하위에 \"%s\" 폴더가 존재합니다. 먼저 삭제해주세요"),
 	FOLDER_CONTAIN_POST(BAD_REQUEST, "\"%s\" 폴더 하위에 \"%s\" 게시글이 존재합니다. 먼저 삭제해주세요"),
+	FOLDER_NOT_MATCH_MEMBER(BAD_REQUEST, "로그인 중인 회원 정보와 폴더 회원 정보가 일치하지 않습니다."),
 
 	// Comment
 	COMMENT_PARENT_ID_NOT_FOUND(BAD_REQUEST, "대댓글을 달기 위해 지정한 댓글을 찾을 수 없습니다."),
