@@ -47,7 +47,7 @@ class LoginControllerTest {
     @Autowired
     private JWTUtil jwtUtil;
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void beforeEach() {

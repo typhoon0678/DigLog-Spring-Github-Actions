@@ -47,7 +47,7 @@ class PostControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -504,6 +504,88 @@ class PostControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    @DisplayName("username, tagId로 게시글 조회에 성공한다.")
+    void getMemberTagPosts() throws Exception {
+        // given
+        String username = "username=test";
+        String tagId = "tagId=22222222-2222-2222-2222-222222222222";
+        String page = "page=0";
+        String size = "size=5";
+        String parameter = "?" + username + "&" + tagId + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/member/tag" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("page").get("totalElements").asInt()).isEqualTo(2);
+        assertThat(data.get("content").get(0).get("title").asText()).isEqualTo("테스트 제목");
+        assertThat(data.get("content").get(1).get("title").asText()).isEqualTo("test title");
+    }
+
+    @Test
+    @DisplayName("tag가 없는 멤버 게시글 조회에 성공한다.")
+    void getMemberTagPosts2() throws Exception {
+        // given
+        String username = "username=test";
+        String page = "page=0";
+        String size = "size=5";
+        String parameter = "?" + username + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/member/tag" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("page").get("totalElements").asInt()).isEqualTo(1);
+        assertThat(data.get("content").get(0).get("title").asText()).isEqualTo("test title2");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 username인 경우 0개가 조회된다.")
+    void getMemberTagPosts3() throws Exception {
+        // given
+        String username = "username=test2";
+        String tagId = "tagId=22222222-2222-2222-2222-222222222222";
+        String page = "page=0";
+        String size = "size=5";
+        String parameter = "?" + username + "&" + tagId + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/member/tag" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("page").get("totalElements").asInt()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 tagId인 경우 0개가 조회된다.")
+    void getMemberTagPosts4() throws Exception {
+        // given
+        String username = "username=test";
+        String tagId = "tagId=22222222-2222-2222-2222-333333333333";
+        String page = "page=0";
+        String size = "size=5";
+        String parameter = "?" + username + "&" + tagId + "&" + page + "&" + size;
+
+        // when
+        MvcResult result = mockMvc.perform(get("/api/post/member/tag" + parameter)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        JsonNode data = objectMapper.readTree(response.getContentAsString());
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(data.get("page").get("totalElements").asInt()).isEqualTo(0);
     }
 
     @Test
