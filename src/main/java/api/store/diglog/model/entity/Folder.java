@@ -22,12 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-	name = "folder",
-	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"member_id", "parent_id", "title"})
-	}
-)
+@Table(name = "folder")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Folder {
