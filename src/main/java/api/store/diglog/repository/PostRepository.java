@@ -36,7 +36,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 	List<Post> findAllByIdInAndMemberId(List<UUID> ids, UUID memberId);
 
 	@Modifying
-	@Query("UPDATE Post p SET p.isDeleted = true WHERE p.id = :id AND p.member = :member")
+	@Query("UPDATE Post p SET p.isDeleted = true, p.folder = null WHERE p.id = :id AND p.member = :member")
 	int updatePostIsDeleted(@Param("id") UUID id, @Param("member") Member member);
 
 	@Query("SELECT p FROM Post p JOIN FETCH p.folder WHERE p.folder.id IN :folderIds")
