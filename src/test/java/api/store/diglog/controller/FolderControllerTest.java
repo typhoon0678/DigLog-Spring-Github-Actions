@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderDeleteRequest;
 import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
@@ -202,5 +204,28 @@ class FolderControllerTest {
 			.andExpect(jsonPath("$[2].orderIndex").value(2))
 			.andExpect(jsonPath("$[2].parentFolderId").doesNotExist())
 			.andExpect(jsonPath("$[2].postCount").value(3L));
+	}
+
+	@DisplayName("폴더를 삭제할 수 있다.")
+	@Test
+	@WithMockUser(username = EMAIL, password = PASSWORD)
+	void deleteAllBy() throws Exception {
+
+		List<FolderDeleteRequest> folderDeleteRequests = List.of(
+			FolderDeleteRequest.builder().folderId(UUID.randomUUID()).build(),
+			FolderDeleteRequest.builder().folderId(UUID.randomUUID()).build(),
+			FolderDeleteRequest.builder().folderId(UUID.randomUUID()).build()
+		);
+
+		mockMvc.perform(
+				delete("/api/folders")
+					.with(csrf())
+					.content(objectMapper.writeValueAsString(folderDeleteRequests))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON)
+			)
+			.andDo(print())
+			.andExpect(status().isNoContent());
+
 	}
 }
