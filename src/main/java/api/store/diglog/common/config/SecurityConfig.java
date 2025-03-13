@@ -34,6 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        String[] oauth2Api = {"/oauth2/**"};
         String[] memberApi = {"/api/member/login", "/api/member/logout", "/api/member/refresh", "/api/member/profile/*", "/api/member/profile/search/*", "/api/verify/**"};
         String[] postGetApi = {"/api/post", "/api/post/*", "/api/post/member/tag"};
         String[] commentGetApi = {"/api/comment"};
@@ -41,8 +42,9 @@ public class SecurityConfig {
         String[] tagGetApi = {"/api/tag/**"};
 
         http
-                .securityMatcher("/api/**")
+                .securityMatcher("/api/**", "/oauth2/**")
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(oauth2Api).permitAll()
                         .requestMatchers(memberApi).permitAll()
                         .requestMatchers(HttpMethod.GET, postGetApi).permitAll()
                         .requestMatchers(HttpMethod.GET, commentGetApi).permitAll()
