@@ -1,0 +1,30 @@
+name: Build and Deploy Docker Image
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build Docker image
+        run: |
+          docker build --build-arg APPLICATION_YML="${{ secrets.APPLICATION_YML }}" --build-arg APPLICATION_PROD_YML="${{ secrets.APPLICATION_PROD_YML }}" -t "${{ secrets.DOCKER_USERNAME }}"/diglog-be .
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/diglog-be
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem "${{ secrets.EC2_HOST }}" << 'EOF'
+            cd docker
+            docker compose down --rmi all
+            docker compose up --build -d
+          EOF
