@@ -36,6 +36,6 @@ public interface FolderRepository extends JpaRepository<Folder, UUID> {
 		""")
 	List<FolderPostCountResponse> findAllWithPostCountByMember(@Param("member") Member member);
 
-	@Query("SELECT f FROM Folder f JOIN FETCH f.parentFolder WHERE f.parentFolder.id IN :folderIds")
+	@Query("SELECT f FROM Folder f JOIN FETCH f.member JOIN FETCH f.parentFolder WHERE f.parentFolder.id IN :folderIds")
 	List<Folder> findAllByParentFolderIdIn(@Param("folderIds") List<UUID> folderIds);
 }
