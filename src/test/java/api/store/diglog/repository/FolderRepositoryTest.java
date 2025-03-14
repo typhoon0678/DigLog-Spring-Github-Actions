@@ -122,4 +122,76 @@ class FolderRepositoryTest {
 			);
 
 	}
+
+	@DisplayName("부모 폴더 id 목록을 이용해 폴더 목록을 조회할 수 있다.")
+	@Test
+	void findAllByParentFolderIdIn() {
+		// given
+		Member member = Member.builder()
+			.email("frod@gmail.com")
+			.username("frod")
+			.password("testPassword")
+			.roles(Set.of(Role.ROLE_USER))
+			.platform(Platform.SERVER)
+			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
+			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
+			.build();
+
+		memberRepository.save(member);
+		entityManager.flush();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("프로젝트 A")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+		Folder folder02 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("DB")
+			.depth(1)
+			.orderIndex(1)
+			.parentFolder(folder01)
+			.build();
+		Folder folder03 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("MySQL")
+			.depth(2)
+			.orderIndex(2)
+			.parentFolder(folder02)
+			.build();
+		Folder folder04 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("Spring")
+			.depth(1)
+			.orderIndex(3)
+			.parentFolder(folder01)
+			.build();
+		Folder folder05 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("AOP")
+			.depth(2)
+			.orderIndex(4)
+			.parentFolder(folder04)
+			.build();
+
+		folderRepository.saveAll(List.of(folder01, folder02, folder03, folder04, folder05));
+		entityManager.flush();
+
+		// when
+		List<Folder> folders = folderRepository.findAllByParentFolderIdIn(
+			List.of(folder01.getId(), folder04.getId())
+		);
+
+		// then
+		assertThat(folders).hasSize(3)
+			.contains(folder02, folder04, folder05);
+
+	}
 }

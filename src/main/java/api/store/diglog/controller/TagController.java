@@ -19,7 +19,7 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping("/{username}")
-    public ResponseEntity<List<TagResponse>> getMemberTags(@PathVariable String username) {
+    public ResponseEntity<List<TagResponse>> getMemberTags(@PathVariable("username") String username) {
         List<TagResponse> tagResponses = tagService.getMemberTags(username);
 
         return ResponseEntity.ok().body(tagResponses);

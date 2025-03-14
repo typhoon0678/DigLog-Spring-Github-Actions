@@ -23,6 +23,7 @@ import api.store.diglog.common.exception.CustomException;
 import api.store.diglog.model.constant.Platform;
 import api.store.diglog.model.constant.Role;
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderDeleteRequest;
 import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.model.entity.Folder;
@@ -426,6 +427,176 @@ class FolderServiceTest {
 		assertThatThrownBy(() -> folderService.createAndUpdateFolders(folderCreateRequests))
 			.isInstanceOf(CustomException.class)
 			.hasMessage("중복된 폴더 순서가 존재합니다.");
+	}
+
+	@DisplayName("폴더를 삭제할 수 있다.")
+	@Test
+	void deleteAllBy() {
+
+		Member member = memberRepository.findByUsername("testUser").get();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("프로젝트 A")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+		Folder folder02 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("DB")
+			.depth(1)
+			.orderIndex(1)
+			.parentFolder(folder01)
+			.build();
+		Folder folder03 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("MySQL")
+			.depth(2)
+			.orderIndex(2)
+			.parentFolder(folder02)
+			.build();
+
+		folderRepository.saveAll(List.of(folder01, folder02, folder03));
+		entityManager.flush();
+
+		List<FolderDeleteRequest> folderDeleteRequests = List.of(
+			FolderDeleteRequest.builder().folderId(folder02.getId()).build(),
+			FolderDeleteRequest.builder().folderId(folder03.getId()).build()
+		);
+
+		// when
+		folderService.deleteAllBy(folderDeleteRequests);
+
+		// then
+		List<Folder> folders = folderRepository.findAll();
+		assertThat(folders).hasSize(1)
+			.containsExactly(folder01);
+
+	}
+
+	@DisplayName("하위 폴더가 존재하는 폴더는 삭제할 수 없다.")
+	@Test
+	void deleteAllBy_WithChildFolder() {
+
+		Member member = memberRepository.findByUsername("testUser").get();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("프로젝트 A")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+		Folder folder02 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("DB")
+			.depth(1)
+			.orderIndex(1)
+			.parentFolder(folder01)
+			.build();
+		Folder folder03 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("MySQL")
+			.depth(2)
+			.orderIndex(2)
+			.parentFolder(folder02)
+			.build();
+
+		folderRepository.saveAll(List.of(folder01, folder02, folder03));
+		entityManager.flush();
+
+		List<FolderDeleteRequest> folderDeleteRequests = List.of(
+			FolderDeleteRequest.builder().folderId(folder02.getId()).build()
+		);
+
+		// when, then
+		assertThatThrownBy(() -> folderService.deleteAllBy(folderDeleteRequests))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("\"DB\" 폴더 하위에 \"MySQL\" 폴더가 존재합니다. 먼저 삭제해주세요");
+	}
+
+	@DisplayName("게시글이 존재하는 폴더는 삭제할 수 없다.")
+	@Test
+	void deleteAllBy_WithPost() {
+
+		Member member = memberRepository.findByUsername("testUser").get();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("프로젝트 A")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+
+		folderRepository.save(folder01);
+		entityManager.flush();
+
+		Post post = Post.builder()
+			.member(member)
+			.folder(folder01)
+			.title("프로젝트 A 개요")
+			.content("프로젝트 A에 관한 설명")
+			.isDeleted(false)
+			.build();
+		postRepository.save(post);
+		entityManager.flush();
+
+		List<FolderDeleteRequest> folderDeleteRequests = List.of(
+			FolderDeleteRequest.builder().folderId(folder01.getId()).build()
+		);
+
+		// when, then
+		assertThatThrownBy(() -> folderService.deleteAllBy(folderDeleteRequests))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("\"프로젝트 A\" 폴더 하위에 \"프로젝트 A 개요\" 게시글이 존재합니다. 먼저 삭제해주세요");
+	}
+
+	@DisplayName("로그인 중인 회원과 폴더 회원이 일치하지 않으면 폴더를 삭제할 수 없다.")
+	@Test
+	void deleteAllBy_WithDifferentMember() {
+
+		Member member = Member.builder()
+			.email("frod90@gmail.com")
+			.username("frod")
+			.password("testPassword")
+			.roles(Set.of(Role.ROLE_USER))
+			.platform(Platform.SERVER)
+			.createdAt(LocalDateTime.of(2022, 2, 22, 12, 0))
+			.updatedAt(LocalDateTime.of(2022, 3, 22, 12, 0))
+			.build();
+
+		memberRepository.save(member);
+		entityManager.flush();
+
+		Folder folder01 = Folder.builder()
+			.id(UUID.randomUUID())
+			.member(member)
+			.title("프로젝트 A")
+			.depth(0)
+			.orderIndex(0)
+			.parentFolder(null)
+			.build();
+
+		folderRepository.save(folder01);
+		entityManager.flush();
+
+		List<FolderDeleteRequest> folderDeleteRequests = List.of(
+			FolderDeleteRequest.builder().folderId(folder01.getId()).build()
+		);
+
+		// when, then
+		assertThatThrownBy(() -> folderService.deleteAllBy(folderDeleteRequests))
+			.isInstanceOf(CustomException.class)
+			.hasMessage("로그인 중인 회원 정보와 폴더 회원 정보가 일치하지 않습니다.");
 	}
 
 }

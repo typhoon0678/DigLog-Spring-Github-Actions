@@ -3,6 +3,7 @@ package api.store.diglog.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import api.store.diglog.model.dto.folder.FolderCreateRequest;
+import api.store.diglog.model.dto.folder.FolderDeleteRequest;
 import api.store.diglog.model.dto.folder.FolderPostCountResponse;
 import api.store.diglog.model.dto.folder.FolderResponse;
 import api.store.diglog.service.FolderService;
@@ -38,5 +40,12 @@ public class FolderController {
 
 		List<FolderResponse> folderResponses = folderService.createAndUpdateFolders(folderCreateRequests);
 		return ResponseEntity.ok().body(folderResponses);
+	}
+
+	@DeleteMapping
+	public ResponseEntity<String> deleteAll(@RequestBody List<FolderDeleteRequest> folderDeleteRequests) {
+
+		folderService.deleteAllBy(folderDeleteRequests);
+		return ResponseEntity.noContent().build();
 	}
 }

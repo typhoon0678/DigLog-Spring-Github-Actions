@@ -13,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
@@ -22,12 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-	name = "folder",
-	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"member_id", "parent_id", "title"})
-	}
-)
+@Table(name = "folder")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Folder {
