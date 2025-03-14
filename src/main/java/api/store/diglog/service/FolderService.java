@@ -174,6 +174,7 @@ public class FolderService {
 	@Transactional
 	public void deleteAllBy(List<FolderDeleteRequest> folderDeleteRequests) {
 
+
 		List<UUID> folderIds = folderDeleteRequests.stream()
 			.map(FolderDeleteRequest::getFolderId)
 			.toList();
@@ -181,8 +182,9 @@ public class FolderService {
 		validateChildFolders(folderIds);
 		validateContainsPosts(folderIds);
 
+		Member currentMember = memberService.getCurrentMember();
 		List<Folder> folders = folderRepository.findAllByIdIn(folderIds);
-		validateFolderMember(folders);
+		validateFolderMember(currentMember, folders);
 
 		int max = calculateMaxDepthFromFolders(folders);
 		int min = calculateMinDepthFromFolders(folders);
@@ -225,9 +227,7 @@ public class FolderService {
 		}
 	}
 
-	private void validateFolderMember(List<Folder> folders) {
-
-		Member currentMember = memberService.getCurrentMember();
+	private void validateFolderMember(Member currentMember, List<Folder> folders) {
 
 		boolean isNotMatchMember = folders.stream()
 			.anyMatch(folder -> !folder.getMember().equals(currentMember));
